@@ -597,67 +597,309 @@ function createAuthModal(defaultTab = 'login') {
             </button>
           </form>
           
-      <a href="#" class="user-menu-item">
-        <i class="fas fa-box"></i>
-        <span>My Products</span>
-      </a>
-      <a href="#" class="user-menu-item">
-        <i class="fas fa-chart-line"></i>
-        <span>Dashboard</span>
-      </a>
-      ` : ''}
-      <a href="#" class="user-menu-item">
-        <i class="fas fa-shopping-bag"></i>
-        <span>My Orders</span>
-      </a>
-      <a href="#" class="user-menu-item">
-        <i class="fas fa-heart"></i>
-        <span>Wishlist</span>
-      </a>
-    </div>
-    <div class="user-menu-footer">
-      <button id="logout-btn" class="logout-btn">
-        <i class="fas fa-sign-out-alt"></i>
-        <span>Sign Out</span>
-      </button>
+          <div class="auth-divider">
+            <span>or sign up with</span>
+          </div>
+          
+          <div class="oauth-buttons">
+            <button class="oauth-btn google-btn" data-provider="google">
+              <i class="fab fa-google"></i>
+              <span>Google</span>
+            </button>
+            <button class="oauth-btn microsoft-btn" data-provider="microsoft">
+              <i class="fab fa-microsoft"></i>
+              <span>Microsoft</span>
+            </button>
+          </div>
+          
+          <p class="auth-footer-text">
+            Already have an account? 
+            <a href="#" class="switch-tab" data-tab="login">Sign in here</a>
+          </p>
+        </div>
+      </div>
     </div>
   `;
   
-  // Position menu
-  const rect = accountBtn.getBoundingClientRect();
-  menu.style.top = `${rect.bottom + 8}px`;
-  menu.style.right = `${window.innerWidth - rect.right}px`;
-  
-  document.body.appendChild(menu);
-  
-  // Close on outside click
-  setTimeout(() => {
-    document.addEventListener('click', closeUserMenuOnClickOutside);
-  }, 0);
-  
-  // Logout button
-  document.getElementById('logout-btn')?.addEventListener('click', logoutUser);
+  document.getElementById('app').insertAdjacentHTML('beforeend', modalHTML);
+  bindAuthEvents();
 }
 
-function closeUserMenuOnClickOutside(e) {
-  const menu = document.querySelector('.user-dropdown-menu');
-  const accountBtn = document.getElementById('account-btn');
+// ====================================
+// BIND AUTH EVENTS
+// ====================================
+function bindAuthEvents() {
+  // Sign In button
+  document.getElementById('signin-btn')?.addEventListener('click', () => {
+    createAuthModal('login');
+  });
   
-  if (menu && !menu.contains(e.target) && !accountBtn.contains(e.target)) {
-    menu.remove();
-    document.removeEventListener('click', closeUserMenuOnClickOutside);
+  // Register button
+  document.getElementById('register-btn')?.addEventListener('click', () => {
+    createAuthModal('register');
+  });
+  
+  // Close modal
+  document.getElementById('close-auth-modal')?.addEventListener('click', closeAuthModal);
+  document.getElementById('auth-modal-overlay')?.addEventListener('click', (e) => {
+    if (e.target === e.currentTarget) closeAuthModal();
+  });
+  
+  // Tab switching
+  document.querySelectorAll('.auth-tab').forEach(tab => {
+    tab.addEventListener('click', () => switchAuthTab(tab.dataset.tab));
+  });
+  
+  document.querySelectorAll('.switch-tab').forEach(link => {
+    link.addEventListener('click', (e) => {
+      e.preventDefault();
+      switchAuthTab(link.dataset.tab);
+    });
+  });
+  
+  // Toggle password visibility
+  document.querySelectorAll('.toggle-password').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const input = btn.parentElement.querySelector('input');
+      const icon = btn.querySelector('i');
+      
+      if (input.type === 'password') {
+        input.type = 'text';
+        icon.classList.replace('fa-eye', 'fa-eye-slash');
+      } else {
+        input.type = 'password';
+        icon.classList.replace('fa-eye-slash', 'fa-eye');
+      }
+    });
+  });
+  
+  // Password strength indicator
+  document.getElementById('register-password')?.addEventListener('input', (e) => {
+    updatePasswordStrength(e.target.value);
+  });
+  
+  // User type selector
+  document.querySelectorAll('.user-type-option input').forEach(option => {
+    option.addEventListener('change', () => {
+      document.querySelectorAll('.user-type-option').forEach(opt => {
+        opt.classList.remove('active');
+      });
+      option.parentElement.classList.add('active');
+    });
+  });
+  
+  // Login form submission
+  document.getElementById('login-form-element')?.addEventListener('submit', (e) => {
+    e.preventDefault();
+    
+    const email = document.getElementById('login-email').value.trim();
+    const password = document.getElementById('login-password').value;
+    
+    // Clear previous errors
+    clearFormErrors('login');
+    
+    // Validate
+    let hasError = false;
+    
+    if (!validateEmail(email)) {
+      showFieldError('login-email', 'login-email-error', 'Please enter a valid email address');
+      hasError = true;
+    }
+    
+    if (!password) {
+      showFieldError('login-password', 'login-password-error', 'Password is required');
+      hasError = true;
+    }
+    
+    if (hasError) return;
+    
+    const result = loginUser(email, password);
+    
+    if (result.success) {
+      closeAuthModal();
+      updateUIForAuthState();
+      showToast(`Welcome back, ${result.user.username}!`, 'success');
+    } else {
+      showFieldError('login-password', 'login-password-error', result.error);
+    }
+  });
+  
+  // Register form submission
+  document.getElementById('register-form-element')?.addEventListener('submit', (e) => {
+    e.preventDefault();
+    
+    const username = document.getElementById('register-username').value.trim();
+    const fullName = document.getElementById('register-fullname').value.trim();
+    const email = document.getElementById('register-email').value.trim();
+    const password = document.getElementById('register-password').value;
+    const confirmPassword = document.getElementById('register-confirm-password').value;
+    const userType = document.querySelector('input[name="userType"]:checked').value;
+    const agreeTerms = document.getElementById('agree-terms').checked;
+    
+    // Clear previous errors
+    clearFormErrors('register');
+    
+    // Validate
+    let hasError = false;
+    
+    if (!validateUsername(username)) {
+      showFieldError('register-username', 'register-username-error', 'Username must be 3+ characters (letters, numbers, underscores)');
+      hasError = true;
+    }
+    
+    if (!fullName) {
+      showFieldError('register-fullname', 'register-fullname-error', 'Full name is required');
+      hasError = true;
+    }
+    
+    if (!validateEmail(email)) {
+      showFieldError('register-email', 'register-email-error', 'Please enter a valid email address');
+      hasError = true;
+    }
+    
+    const passwordValidation = validatePassword(password);
+    if (!passwordValidation.valid) {
+      showFieldError('register-password', 'register-password-error', 'Password does not meet requirements');
+      hasError = true;
+    }
+    
+    if (password !== confirmPassword) {
+      showFieldError('register-confirm-password', 'register-confirm-password-error', 'Passwords do not match');
+      hasError = true;
+    }
+    
+    if (!agreeTerms) {
+      showToast('Please agree to the Terms of Service and Privacy Policy', 'warning');
+      hasError = true;
+    }
+    
+    if (hasError) return;
+    
+    const result = registerUser({ username, fullName, email, password, userType });
+    
+    if (result.success) {
+      closeAuthModal();
+      updateUIForAuthState();
+      showToast(`Welcome to HexStore, ${result.user.username}! Your account has been created successfully.`, 'success');
+    } else {
+      showToast(result.error, 'error');
+    }
+  });
+  
+  // OAuth buttons
+  document.querySelectorAll('.oauth-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const provider = btn.dataset.provider;
+      const result = handleOAuthLogin(provider);
+      
+      if (result.success) {
+        closeAuthModal();
+        updateUIForAuthState();
+        showToast(`Welcome, ${result.user.username}! You're now signed in with ${provider}.`, 'success');
+      } else {
+        showToast(result.error, 'error');
+      }
+    });
+  });
+  
+  // ESC key to close
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+      const modal = document.getElementById('auth-modal-overlay');
+      if (modal && !modal.classList.contains('hidden')) {
+        closeAuthModal();
+      }
+    }
+  });
+}
+
+// ====================================
+// HELPER FUNCTIONS
+// ====================================
+function switchAuthTab(tabName) {
+  document.querySelectorAll('.auth-tab').forEach(tab => {
+    const isActive = tab.dataset.tab === tabName;
+    tab.classList.toggle('active', isActive);
+    tab.setAttribute('aria-selected', isActive);
+  });
+  
+  document.getElementById('login-form')?.classList.toggle('hidden', tabName !== 'login');
+  document.getElementById('register-form')?.classList.toggle('hidden', tabName !== 'register');
+}
+
+function openAuthModal(tab = 'login') {
+  createAuthModal(tab);
+}
+
+function closeAuthModal() {
+  const modal = document.getElementById('auth-modal-overlay');
+  if (modal) {
+    modal.classList.add('hidden');
+    setTimeout(() => modal.remove(), 300);
   }
 }
 
-// Initialize auth module
-function initAuth() {
-  createAuthModal();
-  updateUIForAuthState();
+function updatePasswordStrength(password) {
+  const strength = getPasswordStrength(password);
+  const fill = document.getElementById('strength-fill');
+  const label = document.getElementById('strength-label');
+  
+  if (!fill || !label) return;
+  
+  fill.style.width = strength.percentage + '%';
+  fill.className = 'strength-fill level-' + strength.level;
+  label.textContent = `Password strength: ${strength.level}`;
+  label.className = 'strength-label level-' + strength.level;
+  
+  // Update check items
+  document.querySelectorAll('.check-item').forEach(item => {
+    const check = item.dataset.check;
+    const icon = item.querySelector('i');
+    
+    if (strength.checks[check]) {
+      icon.classList.replace('fa-circle', 'fa-check-circle');
+      item.classList.add('passed');
+    } else {
+      icon.classList.replace('fa-check-circle', 'fa-circle');
+      item.classList.remove('passed');
+    }
+  });
 }
 
-// Export functions for use in main.js
+function showFieldError(inputId, errorId, message) {
+  const input = document.getElementById(inputId);
+  const error = document.getElementById(errorId);
+  
+  if (input) {
+    input.classList.add('error');
+    input.parentElement.classList.add('has-error');
+  }
+  
+  if (error) {
+    error.textContent = message;
+    error.classList.add('visible');
+  }
+}
+
+function clearFormErrors(formType) {
+  document.querySelectorAll(`#${formType}-form .form-error`).forEach(el => {
+    el.textContent = '';
+    el.classList.remove('visible');
+  });
+  
+  document.querySelectorAll(`#${formType}-form input.error`).forEach(el => {
+    el.classList.remove('error');
+    el.parentElement?.classList.remove('has-error');
+  });
+}
+
+// ====================================
+// EXPORT API
+// ====================================
 window.HexAuth = {
-  init: initAuth,
+  init: () => {
+    updateUIForAuthState();
+  },
   register: registerUser,
   login: loginUser,
   logout: logoutUser,
@@ -667,5 +909,11 @@ window.HexAuth = {
   isBuyer,
   openAuthModal,
   closeAuthModal,
-  handleOAuthLogin
+  handleOAuthLogin,
+  showToast
 };
+
+// Initialize on DOM ready
+document.addEventListener('DOMContentLoaded', () => {
+  HexAuth.init();
+});
