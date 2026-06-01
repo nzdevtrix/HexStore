@@ -581,20 +581,18 @@
   <div id="toast-container" class="toast-container"></div>
 
   <script type="module">
-    import { registerUserFirebase, validateEmail } from './src/firebase.js';
+    import { registerUserFirebase, validateEmail, auth, db } from './src/firebase.js';
     import { 
       createUserWithEmailAndPassword, 
-      updateProfile,
-      getAuth 
-    } from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js';
+      updateProfile
+    } from 'firebase/auth';
     import {
-      getFirestore,
       collection,
       addDoc,
       query,
       where,
       getDocs
-    } from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js';
+    } from 'firebase/firestore/lite';
 
     // Toggle password visibility
     document.querySelectorAll('.toggle-password').forEach(btn => {
@@ -780,9 +778,6 @@
 
       try {
         // Register via Firebase
-        const auth = getAuth();
-        const db = getFirestore();
-        
         const result = await createUserWithEmailAndPassword(auth, email, password);
         const user = result.user;
 

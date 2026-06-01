@@ -7,7 +7,8 @@ import { BuyerDashboardComponent } from './buyer-dashboard/buyer-dashboard.compo
 const routes: Routes = [
   { path: '', component: AppComponent, pathMatch: 'full' },
   { path: 'seller', component: SellerDashboardComponent },
-  { path: 'buyer', component: BuyerDashboardComponent }
+  { path: 'buyer', component: BuyerDashboardComponent },
+  { path: '**', redirectTo: '' }
 ];
 
 @NgModule({

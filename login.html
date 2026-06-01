@@ -341,7 +341,6 @@
 
   <script type="module">
     import { signInUser, getUserDoc, onFirebaseAuthChange, seedDefaultUser, auth } from './src/firebase.js';
-    import { signInWithEmailAndPassword } from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js';
 
     // Toggle password visibility
     document.querySelectorAll('.toggle-password').forEach(btn => {
@@ -442,8 +441,7 @@
 
       try {
         // Authenticate via Firebase
-        const userCredential = await signInWithEmailAndPassword(auth, email, password);
-        const user = userCredential.user;
+        const user = await signInUser(email, password);
         
         // Get user document from Firestore to determine role
         const userDoc = await getUserDoc(user.uid);

@@ -25,3 +25,6 @@ dist-ssr
 
 # Angular cache
 dashboard-app/.angular/cache/
+
+backend/serviceAccountKey.json
+serviceAccountKey.json

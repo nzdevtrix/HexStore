@@ -1,281 +1,373 @@
-<div class="admin-header">
-  <div class="admin-header-inner">
-    <div class="admin-brand">
-      <i class="fas fa-shield-alt"></i>
-      <div>
-        <h1>HexStore Admin</h1>
-        <span class="admin-badge">FULL DATABASE ACCESS</span>
+<div class="purple-app" *ngIf="isAdmin">
+  <!-- Sidebar -->
+  <aside class="purple-sidebar">
+    <div class="sidebar-brand">
+      <i class="fas fa-cube"></i>
+      <span>HexStore</span>
+    </div>
+    
+    <div class="sidebar-profile">
+      <div class="profile-avatar">
+        <i class="fas fa-user-shield"></i>
+      </div>
+      <div class="profile-info">
+        <strong>Admin User</strong>
+        <span>Project Manager</span>
       </div>
     </div>
-    <div class="admin-user">
-      <span><i class="fas fa-user"></i> {{ currentUser?.email }}</span>
-      <button class="btn btn-outline" (click)="signOut()"><i class="fas fa-sign-out-alt"></i> Sign Out</button>
-    </div>
-  </div>
-</div>
 
-<div class="admin-container" *ngIf="isAdmin">
-  <!-- Mega Stats -->
-  <div class="mega-stats">
-    <div class="mega-stat">
-      <div class="mega-icon" style="background:rgba(59,130,246,0.1);color:#3b82f6">
+    <nav class="sidebar-nav">
+      <a class="nav-item" [class.active]="selectedTab==='overview'" (click)="selectedTab='overview'">
+        <i class="fas fa-th-large"></i>
+        <span>Dashboard</span>
+      </a>
+      <a class="nav-item" [class.active]="selectedTab==='users'" (click)="selectedTab='users'">
         <i class="fas fa-users"></i>
-      </div>
-      <div class="mega-info">
-        <div class="mega-value">{{ metrics.users }}</div>
-        <div class="mega-label">Total Users</div>
-      </div>
-      <div class="mega-breakdown">
-        <span><i class="fas fa-store"></i> {{ metrics.sellers }} sellers</span>
-        <span><i class="fas fa-user"></i> {{ metrics.buyers }} buyers</span>
-      </div>
-    </div>
-    <div class="mega-stat">
-      <div class="mega-icon" style="background:rgba(16,185,129,0.1);color:#10b981">
+        <span>Users</span>
+        <span class="nav-badge">{{ metrics.users }}</span>
+      </a>
+      <a class="nav-item" [class.active]="selectedTab==='products'" (click)="selectedTab='products'">
         <i class="fas fa-box"></i>
-      </div>
-      <div class="mega-info">
-        <div class="mega-value">{{ metrics.products }}</div>
-        <div class="mega-label">Total Products</div>
-      </div>
-      <div class="mega-breakdown">
-        <span><i class="fas fa-check"></i> Active listings</span>
-      </div>
-    </div>
-    <div class="mega-stat">
-      <div class="mega-icon" style="background:rgba(245,158,11,0.1);color:#f59e0b">
+        <span>Products</span>
+        <span class="nav-badge">{{ metrics.products }}</span>
+      </a>
+      <a class="nav-item" [class.active]="selectedTab==='orders'" (click)="selectedTab='orders'">
         <i class="fas fa-shopping-cart"></i>
-      </div>
-      <div class="mega-info">
-        <div class="mega-value">{{ metrics.orders }}</div>
-        <div class="mega-label">Total Orders</div>
-      </div>
-      <div class="mega-breakdown">
-        <span><i class="fas fa-dollar-sign"></i> {{ formatPrice(metrics.revenue) }} revenue</span>
+        <span>Orders</span>
+        <span class="nav-badge">{{ metrics.orders }}</span>
+      </a>
+      <a class="nav-item" [class.active]="selectedTab==='analytics'" (click)="selectedTab='analytics'">
+        <i class="fas fa-chart-line"></i>
+        <span>Analytics</span>
+      </a>
+      <a class="nav-item" [class.active]="selectedTab==='system'" (click)="selectedTab='system'">
+        <i class="fas fa-cog"></i>
+        <span>System</span>
+        <span class="status-dot" [class.connected]="backendConnected"></span>
+      </a>
+    </nav>
+
+    <div class="sidebar-footer">
+      <button class="sidebar-btn" (click)="signOut()">
+        <i class="fas fa-sign-out-alt"></i> Sign Out
+      </button>
+    </div>
+  </aside>
+
+  <!-- Top Bar -->
+  <header class="purple-topbar">
+    <div class="topbar-left">
+      <button class="icon-btn"><i class="fas fa-bars"></i></button>
+      <div class="search-box">
+        <i class="fas fa-search"></i>
+        <input type="text" placeholder="Search products, users, orders...">
       </div>
     </div>
-    <div class="mega-stat">
-      <div class="mega-icon" style="background:rgba(239,68,68,0.1);color:#ef4444">
-        <i class="fas fa-database"></i>
+    <div class="topbar-right">
+      <button class="icon-btn"><i class="fas fa-expand"></i></button>
+      <button class="icon-btn"><i class="fas fa-envelope"></i><span class="dot"></span></button>
+      <button class="icon-btn"><i class="fas fa-bell"></i><span class="dot red"></span></button>
+      <div class="topbar-user">
+        <img src="https://i.pravatar.cc/40?img=12" alt="admin">
+        <span>{{ currentUser?.displayName || currentUser?.email || 'Admin' }}</span>
+        <i class="fas fa-chevron-down"></i>
       </div>
-      <div class="mega-info">
-        <div class="mega-value">Active</div>
-        <div class="mega-label">Firebase Status</div>
+      <button class="icon-btn"><i class="fas fa-power-off"></i></button>
+    </div>
+  </header>
+
+  <!-- Main Content -->
+  <main class="purple-main">
+    <div class="page-header">
+      <h1>Dashboard</h1>
+      <span class="overview-tag">Overview <i class="fas fa-info-circle"></i></span>
+    </div>
+
+    <!-- Stat Cards -->
+    <div class="stat-grid" *ngIf="selectedTab==='overview' || selectedTab==='analytics'">
+      <div class="stat-card gradient-pink">
+        <div class="stat-content">
+          <span class="stat-label">Weekly Sales</span>
+          <span class="stat-value">{{ formatPrice(metrics.revenue) }}</span>
+          <span class="stat-change up">↑ Increased by 60%</span>
+        </div>
+        <i class="fas fa-chart-line stat-icon"></i>
       </div>
-      <div class="mega-breakdown">
-        <span><i class="fas fa-check-circle" style="color:#10b981"></i> All systems operational</span>
+      <div class="stat-card gradient-blue">
+        <div class="stat-content">
+          <span class="stat-label">Weekly Orders</span>
+          <span class="stat-value">{{ metrics.orders }}</span>
+          <span class="stat-change down">↓ Decreased by 10%</span>
+        </div>
+        <i class="fas fa-bookmark stat-icon"></i>
+      </div>
+      <div class="stat-card gradient-teal">
+        <div class="stat-content">
+          <span class="stat-label">Visitors Online</span>
+          <span class="stat-value">{{ metrics.users }}</span>
+          <span class="stat-change up">↑ Increased by 5%</span>
+        </div>
+        <i class="fas fa-gem stat-icon"></i>
       </div>
     </div>
-  </div>
 
-  <!-- Admin Tab Navigation -->
-  <div class="admin-tabs">
-    <button class="admin-tab" [class.active]="selectedTab==='overview'" (click)="selectedTab='overview'">
-      <i class="fas fa-chart-pie"></i> Overview
-    </button>
-    <button class="admin-tab" [class.active]="selectedTab==='users'" (click)="selectedTab='users'">
-      <i class="fas fa-users"></i> Users <span class="tab-badge">{{ metrics.users }}</span>
-    </button>
-    <button class="admin-tab" [class.active]="selectedTab==='products'" (click)="selectedTab='products'">
-      <i class="fas fa-box"></i> Products <span class="tab-badge">{{ metrics.products }}</span>
-    </button>
-    <button class="admin-tab" [class.active]="selectedTab==='orders'" (click)="selectedTab='orders'">
-      <i class="fas fa-truck"></i> Orders <span class="tab-badge">{{ metrics.orders }}</span>
-    </button>
-    <button class="admin-tab" [class.active]="selectedTab==='system'" (click)="selectedTab='system'">
-      <i class="fas fa-cog"></i> System
-    </button>
-  </div>
-
-  <!-- OVERVIEW TAB -->
-  <div class="admin-content" *ngIf="selectedTab==='overview'">
-    <div class="overview-grid">
-      <div class="overview-card">
-        <h4><i class="fas fa-users"></i> User Distribution</h4>
-        <div class="pie-chart">
-          <div class="pie-segment" style="--pct: {{ metrics.sellers / (metrics.users || 1) * 100 }}; --color: #3b82f6">
-            <span>Sellers {{ (metrics.sellers / (metrics.users || 1) * 100).toFixed(1) }}%</span>
+    <!-- Charts Section -->
+    <div class="charts-grid" *ngIf="selectedTab==='overview' || selectedTab==='analytics'">
+      <div class="chart-card">
+        <div class="chart-header">
+          <h3>Visit And Sales Statistics</h3>
+          <div class="chart-legend">
+            <span class="legend-item"><span class="dot purple"></span> CHN</span>
+            <span class="legend-item"><span class="dot pink"></span> USA</span>
+            <span class="legend-item"><span class="dot blue"></span> UK</span>
           </div>
-          <div class="pie-segment" style="--pct: {{ metrics.buyers / (metrics.users || 1) * 100 }}; --color: #10b981">
-            <span>Buyers {{ (metrics.buyers / (metrics.users || 1) * 100).toFixed(1) }}%</span>
+        </div>
+        <div class="chart-body">
+          <canvas id="salesChart" width="600" height="220"></canvas>
+        </div>
+      </div>
+      <div class="chart-card">
+        <div class="chart-header">
+          <h3>Traffic Sources</h3>
+        </div>
+        <div class="chart-body donut-body">
+          <div class="donut-chart">
+            <svg viewBox="0 0 100 100">
+              <circle cx="50" cy="50" r="35" fill="none" stroke="#f5576c" stroke-width="16" 
+                stroke-dasharray="220" stroke-dashoffset="132" transform="rotate(-90 50 50)"></circle>
+              <circle cx="50" cy="50" r="35" fill="none" stroke="#0f6fff" stroke-width="16" 
+                stroke-dasharray="220" stroke-dashoffset="66" transform="rotate(54 50 50)"></circle>
+              <circle cx="50" cy="50" r="35" fill="none" stroke="#00d4ff" stroke-width="16" 
+                stroke-dasharray="220" stroke-dashoffset="154" transform="rotate(162 50 50)"></circle>
+            </svg>
+          </div>
+          <div class="donut-legend">
+            <div class="legend-row"><span class="dot blue"></span> Search Engines <strong>30%</strong></div>
+            <div class="legend-row"><span class="dot teal"></span> Direct Click <strong>30%</strong></div>
+            <div class="legend-row"><span class="dot pink"></span> Bookmarks Click <strong>40%</strong></div>
           </div>
         </div>
       </div>
-      <div class="overview-card">
-        <h4><i class="fas fa-database"></i> Database Collections</h4>
-        <div class="db-collections">
-          <div class="db-collection"><span>users</span><span class="count">{{ metrics.users }}</span></div>
-          <div class="db-collection"><span>products</span><span class="count">{{ metrics.products }}</span></div>
-          <div class="db-collection"><span>orders</span><span class="count">{{ metrics.orders }}</span></div>
-        </div>
-      </div>
-      <div class="overview-card full-width">
-        <h4><i class="fas fa-history"></i> Recent Activity</h4>
-        <div class="activity-feed">
-          <div class="activity-item" *ngFor="let o of orders.slice(0, 5)">
-            <i class="fas fa-shopping-bag"></i>
-            <span>Order #{{ o.id?.substr(0, 8) }} — {{ o.customerName || 'Unknown' }} — {{ formatPrice(o.total) }}</span>
-            <span class="activity-status" [class.pending]="o.status==='pending'" [class.completed]="o.status==='completed'">{{ o.status }}</span>
-          </div>
-          <div class="activity-empty" *ngIf="orders.length === 0">No recent activity</div>
-        </div>
-      </div>
     </div>
-  </div>
 
-  <!-- USERS TAB -->
-  <div class="admin-content" *ngIf="selectedTab==='users'">
-    <div class="admin-table-toolbar">
-      <h4><i class="fas fa-users"></i> All Users <small>({{ metrics.users }} total)</small></h4>
-    </div>
-    <div class="admin-table-wrap">
-      <table class="admin-table">
+    <!-- Recent Orders Table -->
+    <div class="table-card" *ngIf="selectedTab==='overview' || selectedTab==='orders'">
+      <div class="table-header">
+        <h3>Recent Orders</h3>
+        <a class="view-all" (click)="selectedTab='orders'">View All <i class="fas fa-arrow-right"></i></a>
+      </div>
+      <table class="purple-table">
         <thead>
           <tr>
-            <th>Name</th>
-            <th>Email</th>
-            <th>Role</th>
-            <th>Account Type</th>
-            <th>Created</th>
-            <th>Actions</th>
+            <th>Customer</th>
+            <th>Subject</th>
+            <th>Status</th>
+            <th>Last Update</th>
+            <th>Tracking ID</th>
           </tr>
         </thead>
         <tbody>
+          <tr *ngFor="let o of orders.slice(0, 5)">
+            <td>
+              <div class="user-cell">
+                <img src="https://i.pravatar.cc/32?u={{o.id}}" alt="">
+                <span>{{ o.customerName || o.buyerName || 'Customer' }}</span>
+              </div>
+            </td>
+            <td>Order #{{ o.id?.substr(0, 8) }} — {{ formatPrice(o.total) }}</td>
+            <td>
+              <span class="status-pill" 
+                [class.done]="o.status==='completed'" 
+                [class.progress]="o.status==='shipped'" 
+                [class.pending]="o.status==='pending'">
+                {{ o.status || 'pending' }}
+              </span>
+            </td>
+            <td>{{ o.createdAt ? (o.createdAt | date:'short') : 'N/A' }}</td>
+            <td><code>#{{ o.id?.substr(0, 8) }}</code></td>
+          </tr>
+          <tr *ngIf="orders.length === 0">
+            <td colspan="5" class="empty-row">No orders found. Go to System tab → "Seed Sample Data" to populate.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- USERS TAB -->
+    <div class="table-card" *ngIf="selectedTab==='users'">
+      <div class="table-header">
+        <h3>All Users ({{ metrics.users }})</h3>
+      </div>
+      <table class="purple-table">
+        <thead>
+          <tr><th>Name</th><th>Email</th><th>Role</th><th>Created</th><th>Actions</th></tr>
+        </thead>
+        <tbody>
           <tr *ngFor="let u of users">
-            <td><strong>{{ u.fullName || u.name || u.username || 'N/A' }}</strong></td>
+            <td>
+              <div class="user-cell">
+                <img src="https://i.pravatar.cc/32?u={{u.email}}" alt="">
+                <span>{{ u.fullName || u.name || u.username || 'N/A' }}</span>
+              </div>
+            </td>
             <td>{{ u.email }}</td>
-            <td><span class="role-badge" [class.admin]="u.role==='admin'||u.userType==='admin'" [class.seller]="u.role==='seller'||u.userType==='seller'" [class.buyer]="u.role==='buyer'||u.userType==='buyer'">{{ u.role || u.userType || 'unknown' }}</span></td>
-            <td>{{ u.provider || 'email' }}</td>
+            <td>
+              <span class="status-pill" 
+                [class.admin]="u.role==='admin'||u.userType==='admin'" 
+                [class.seller]="u.role==='seller'||u.userType==='seller'" 
+                [class.buyer]="u.role==='buyer'||u.userType==='buyer'">
+                {{ u.role || u.userType || 'unknown' }}
+              </span>
+            </td>
             <td>{{ u.createdAt ? (u.createdAt | date:'shortDate') : 'N/A' }}</td>
             <td>
-              <button class="btn btn-sm btn-danger" (click)="deleteUser(u.id)" *ngIf="u.role !== 'admin'">
+              <button class="icon-btn-small danger" (click)="deleteUser(u.id)" *ngIf="u.role !== 'admin'">
                 <i class="fas fa-trash"></i>
               </button>
             </td>
           </tr>
-          <tr *ngIf="users.length === 0">
-            <td colspan="6" class="empty-cell">No users found in database</td>
-          </tr>
         </tbody>
       </table>
     </div>
-  </div>
 
-  <!-- PRODUCTS TAB -->
-  <div class="admin-content" *ngIf="selectedTab==='products'">
-    <div class="admin-table-toolbar">
-      <h4><i class="fas fa-box"></i> All Products <small>({{ metrics.products }} total)</small></h4>
-    </div>
-    <div class="admin-table-wrap">
-      <table class="admin-table">
+    <!-- PRODUCTS TAB -->
+    <div class="table-card" *ngIf="selectedTab==='products'">
+      <div class="table-header">
+        <h3>All Products ({{ metrics.products }})</h3>
+      </div>
+      <table class="purple-table">
         <thead>
-          <tr>
-            <th>Title</th>
-            <th>Seller</th>
-            <th>Category</th>
-            <th>Price</th>
-            <th>Stock</th>
-            <th>Actions</th>
-          </tr>
+          <tr><th>Title</th><th>Seller</th><th>Category</th><th>Price</th><th>Stock</th><th>Actions</th></tr>
         </thead>
         <tbody>
           <tr *ngFor="let p of products">
-            <td><strong>{{ p.title }}</strong></td>
-            <td>{{ p.sellerName || p.sellerId?.substr(0, 8) || 'N/A' }}</td>
-            <td>{{ p.category }}</td>
-            <td>{{ formatPrice(p.price) }}</td>
             <td>
-              <span [style.color]="(p.stock || 0) > 0 ? '#10b981' : '#ef4444'">
-                {{ (p.stock || 0) > 0 ? p.stock + ' in stock' : 'Out of stock' }}
+              <div class="user-cell">
+                <img [src]="p.img || 'https://via.placeholder.com/32'" alt="">
+                <span>{{ p.title }}</span>
+              </div>
+            </td>
+            <td>{{ p.sellerName || 'N/A' }}</td>
+            <td>{{ p.category }}</td>
+            <td><strong>{{ formatPrice(p.price) }}</strong></td>
+            <td>
+              <span class="status-pill" [class.done]="(p.stock||0)>0" [class.pending]="(p.stock||0)<=0">
+                {{ (p.stock||0) > 0 ? p.stock + ' in stock' : 'Out of stock' }}
               </span>
             </td>
             <td>
-              <button class="btn btn-sm btn-danger" (click)="deleteProduct(p.id)">
-                <i class="fas fa-trash"></i> Remove
+              <button class="icon-btn-small danger" (click)="deleteProduct(p.id)">
+                <i class="fas fa-trash"></i>
               </button>
             </td>
-          </tr>
-          <tr *ngIf="products.length === 0">
-            <td colspan="6" class="empty-cell">No products found</td>
           </tr>
         </tbody>
       </table>
     </div>
-  </div>
 
-  <!-- ORDERS TAB -->
-  <div class="admin-content" *ngIf="selectedTab==='orders'">
-    <div class="admin-table-toolbar">
-      <h4><i class="fas fa-truck"></i> All Orders <small>({{ metrics.orders }} total)</small></h4>
-    </div>
-    <div class="admin-table-wrap">
-      <table class="admin-table">
+    <!-- ORDERS TAB -->
+    <div class="table-card" *ngIf="selectedTab==='orders' && selectedTab !== 'overview'">
+      <div class="table-header">
+        <h3>All Orders ({{ metrics.orders }})</h3>
+      </div>
+      <table class="purple-table">
         <thead>
-          <tr>
-            <th>Order ID</th>
-            <th>Customer</th>
-            <th>Seller</th>
-            <th>Items</th>
-            <th>Total</th>
-            <th>Status</th>
-          </tr>
+          <tr><th>Order ID</th><th>Customer</th><th>Total</th><th>Status</th><th>Created</th></tr>
         </thead>
         <tbody>
           <tr *ngFor="let o of orders">
             <td><code>#{{ o.id?.substr(0, 10) }}</code></td>
-            <td>{{ o.customerName || o.buyerId?.substr(0, 8) || 'N/A' }}</td>
-            <td>{{ o.sellerName || o.sellerId?.substr(0, 8) || 'N/A' }}</td>
-            <td>{{ o.itemCount || 0 }}</td>
-            <td>{{ formatPrice(o.total) }}</td>
-            <td><span class="role-badge" [class.admin]="o.status==='completed'" [class.seller]="o.status==='shipped'" [class.buyer]="o.status==='pending'">{{ o.status || 'pending' }}</span></td>
-          </tr>
-          <tr *ngIf="orders.length === 0">
-            <td colspan="6" class="empty-cell">No orders found</td>
+            <td>{{ o.customerName || o.buyerName || 'N/A' }}</td>
+            <td><strong>{{ formatPrice(o.total) }}</strong></td>
+            <td>
+              <span class="status-pill" 
+                [class.done]="o.status==='completed'" 
+                [class.progress]="o.status==='shipped'" 
+                [class.pending]="o.status==='pending'">
+                {{ o.status || 'pending' }}
+              </span>
+            </td>
+            <td>{{ o.createdAt ? (o.createdAt | date:'short') : 'N/A' }}</td>
           </tr>
         </tbody>
       </table>
     </div>
-  </div>
 
-  <!-- SYSTEM TAB -->
-  <div class="admin-content" *ngIf="selectedTab==='system'">
-    <div class="system-grid">
-      <div class="system-card">
-        <h4><i class="fas fa-fire"></i> Firebase Project</h4>
-        <div class="sys-info">
-          <div><span>Project ID:</span> <code>hexstore-8d6b2</code></div>
-          <div><span>Auth:</span> <span style="color:#10b981">Email/Password enabled</span></div>
-          <div><span>Database:</span> <span style="color:#10b981">Firestore active</span></div>
-          <div><span>Collections:</span> <code>users, products, orders</code></div>
+    <!-- SYSTEM TAB -->
+    <div class="table-card" *ngIf="selectedTab==='system'">
+      <div class="table-header">
+        <h3>System Management</h3>
+      </div>
+      <div class="system-panels">
+        <div class="system-panel" [class.online]="backendConnected">
+          <div class="panel-icon"><i class="fas fa-server"></i></div>
+          <div class="panel-info">
+            <strong>Backend API</strong>
+            <span class="panel-status">
+              <i class="fas fa-circle"></i> {{ backendConnected ? 'Connected' : 'Disconnected' }}
+            </span>
+            <small *ngIf="systemHealth">Uptime: {{ (systemHealth.uptime / 60).toFixed(1) }} min</small>
+          </div>
+        </div>
+        <div class="system-panel online">
+          <div class="panel-icon"><i class="fas fa-fire"></i></div>
+          <div class="panel-info">
+            <strong>Firebase</strong>
+            <span class="panel-status"><i class="fas fa-circle"></i> Active</span>
+            <small>Project: hexstore-8d6b2</small>
+          </div>
+        </div>
+        <div class="system-panel">
+          <div class="panel-icon"><i class="fas fa-database"></i></div>
+          <div class="panel-info">
+            <strong>Database</strong>
+            <span class="panel-status"><i class="fas fa-circle"></i> {{ collections.length }} collections</span>
+            <small *ngFor="let col of collections.slice(0, 3)">
+              {{ col.name }}: {{ col.documentCount }} docs
+            </small>
+          </div>
+        </div>
+        <div class="system-actions">
+          <button class="action-btn-large" (click)="refreshData()">
+            <i class="fas fa-sync"></i> Refresh Data
+          </button>
+          <button class="action-btn-large primary" (click)="seedDatabase()">
+            <i class="fas fa-database"></i> Seed Sample Data
+          </button>
         </div>
       </div>
-      <div class="system-card">
-        <h4><i class="fas fa-shield-alt"></i> Admin Access</h4>
-        <div class="sys-info">
-          <div><span>Admin Portal:</span> <a href="/access/db/only-hexadmin/admin/dev/main/access.html" target="_blank">Open Admin Login</a></div>
-          <div><span>Admin Code:</span> <code>hx2984293a239</code></div>
-          <div><span>Default Password:</span> <code>password</code></div>
-          <div><span>Email:</span> <code>admin@hexstore.io</code></div>
+
+      <div class="test-accounts">
+        <h4>Test Accounts</h4>
+        <div class="account-card">
+          <span class="role-badge admin">Admin</span>
+          <code>admin@hexstore.io</code> / <code>password</code>
         </div>
-      </div>
-      <div class="system-card">
-        <h4><i class="fas fa-users"></i> Test Accounts</h4>
-        <div class="sys-info">
-          <div><span>John Doe:</span> <code>john.doe@email.io</code> / <code>TestPass123!</code></div>
-          <div><span>Role:</span> <span class="role-badge seller">Seller</span></div>
-          <div><span>Store:</span> JD Electronics</div>
-          <div><span>Admin:</span> <code>admin@hexstore.io</code> / <code>password</code></div>
+        <div class="account-card">
+          <span class="role-badge seller">Seller</span>
+          <code>john.doe@email.io</code> / <code>TestPass123!</code>
         </div>
-      </div>
-      <div class="system-card">
-        <h4><i class="fas fa-chart-line"></i> System Metrics</h4>
-        <div class="sys-info">
-          <div><span>Total Users:</span> <strong>{{ metrics.users }}</strong></div>
-          <div><span>Total Products:</span> <strong>{{ metrics.products }}</strong></div>
-          <div><span>Total Orders:</span> <strong>{{ metrics.orders }}</strong></div>
-          <div><span>Total Revenue:</span> <strong>{{ formatPrice(metrics.revenue) }}</strong></div>
+        <div class="account-card">
+          <span class="role-badge buyer">Buyer</span>
+          <code>jane.smith@email.io</code> / <code>TestPass123!</code>
         </div>
       </div>
     </div>
+  </main>
+</div>
+
+<div class="loading-state" *ngIf="currentUser && !isAdmin">
+  <i class="fas fa-spinner fa-spin"></i>
+  <p>Loading admin dashboard...</p>
+</div>
+
+<div class="not-authed" *ngIf="!currentUser">
+  <div class="auth-card">
+    <i class="fas fa-shield-alt"></i>
+    <h2>Admin Access Required</h2>
+    <p>You must be authenticated as an admin to view this dashboard.</p>
+    <a href="/access/db/only-hexadmin/admin/dev/main/access.html" class="btn-primary-purple">
+      <i class="fas fa-key"></i> Admin Login
+    </a>
   </div>
 </div>

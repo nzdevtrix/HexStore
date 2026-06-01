@@ -9,6 +9,7 @@ import { getFirestore, collection, getDocs, addDoc, doc, setDoc, query, where, o
   styleUrls: ['./seller-dashboard.component.css']
 })
 export class SellerDashboardComponent implements OnInit {
+  Math = Math;
   user: any = null;
   userDoc: any = null;
   store: any = { name: 'My Store', description: '', rating: 0, totalSales: 0, revenue: 0 };

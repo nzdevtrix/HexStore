@@ -1,0 +1,23 @@
+{
+  "name": "hexstore-backend",
+  "version": "1.0.0",
+  "description": "HexStore Backend API - Express.js + Firebase Admin SDK",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js",
+    "seed": "curl -X POST http://localhost:3000/api/system/seed -H \"X-API-Key: hexstore-admin-secret-2024\""
+  },
+  "keywords": ["hexstore", "ecommerce", "firebase", "express"],
+  "author": "HexStore",
+  "license": "ISC",
+  "dependencies": {
+    "cors": "^2.8.5",
+    "dotenv": "^16.3.1",
+    "express": "^4.18.2",
+    "firebase-admin": "^12.0.0",
+    "helmet": "^7.1.0",
+    "morgan": "^1.10.0",
+    "uuid": "^9.0.1"
+  }
+}

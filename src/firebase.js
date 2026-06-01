@@ -205,6 +205,14 @@ export async function deleteProduct(productId) {
 }
 
 /**
+ * Validate email format
+ */
+export function validateEmail(email) {
+  const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  return re.test(email);
+}
+
+/**
  * Initialize default seed data (John Doe seller)
  */
 export async function seedDefaultUser() {
@@ -258,6 +266,36 @@ export async function seedDefaultUser() {
         }
       });
       console.log('Default test user created: John Doe (Seller)');
+    } catch (e) {
+      if (e.code !== 'auth/email-already-in-use') throw e;
+    }
+  }
+
+  // Check if Jane Smith (Buyer) exists
+  const janeQ = query(collection(db, 'users'), where('email', '==', 'jane.smith@email.io'));
+  const janeSnap = await getDocs(janeQ);
+  
+  if (janeSnap.empty) {
+    try {
+      const janeResult = await createUserWithEmailAndPassword(auth, 'jane.smith@email.io', 'TestPass123!');
+      await updateProfile(janeResult.user, { displayName: 'Jane Smith' });
+      await addDoc(collection(db, 'users'), {
+        uid: janeResult.user.uid,
+        email: 'jane.smith@email.io',
+        username: 'janesmith',
+        fullName: 'Jane Smith',
+        userType: 'buyer',
+        role: 'buyer',
+        provider: 'email',
+        phone: '+1-555-0200',
+        createdAt: new Date().toISOString(),
+        settings: {
+          notifications: true,
+          newsletter: true,
+          twoFactor: false
+        }
+      });
+      console.log('Default test user created: Jane Smith (Buyer)');
     } catch (e) {
       if (e.code !== 'auth/email-already-in-use') throw e;
     }

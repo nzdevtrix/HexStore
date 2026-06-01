@@ -1,6 +1,7 @@
 import { NgModule } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
 import { FormsModule } from '@angular/forms';
+import { HttpClientModule } from '@angular/common/http';
 
 import { AppComponent } from './app.component';
 import { AccountComponent } from './account.component';
@@ -10,7 +11,7 @@ import { BuyerDashboardComponent } from './buyer-dashboard/buyer-dashboard.compo
 
 @NgModule({
   declarations: [AppComponent, AccountComponent, SellerDashboardComponent, BuyerDashboardComponent],
-  imports: [BrowserModule, FormsModule, AppRoutingModule],
+  imports: [BrowserModule, FormsModule, HttpClientModule, AppRoutingModule],
   providers: [],
   bootstrap: [AppComponent]
 })

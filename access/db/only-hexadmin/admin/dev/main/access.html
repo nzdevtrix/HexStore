@@ -549,12 +549,12 @@
   </div>
 
   <script type="module">
-    import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js';
+    import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
     import { 
       getAuth, 
       signInWithEmailAndPassword,
       onAuthStateChanged
-    } from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js';
+    } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js';
     import {
       getFirestore,
       collection,
@@ -565,7 +565,7 @@
       setDoc,
       addDoc,
       getDoc
-    } from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js';
+    } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
 
     const FIREBASE_CONFIG = {
       apiKey: "AIzaSyACtpVKGa85P3c62th7u3GJpmk88Fk7tWM",
@@ -640,53 +640,16 @@
     // Check if already authenticated as admin
     onAuthStateChanged(auth, async (user) => {
       if (user) {
-        // Check if this user has admin role
-        try {
-          const q = query(collection(db, 'users'), where('uid', '==', user.uid));
-          const snap = await getDocs(q);
-          if (!snap.empty) {
-            const userData = snap.docs[0].data();
-            if (userData.role === 'admin' || userData.userType === 'admin') {
-              // Already authenticated as admin — redirect to dashboard
-              window.location.href = '/dashboard-app/';
-            }
-          }
-        } catch (e) {
-          console.warn('Admin check failed:', e);
-        }
+        // Already authenticated — redirect to dashboard
+        // The dashboard will verify admin role
+        window.location.href = '/dashboard-app/';
       }
     });
 
-    // Check if admin exists in Firebase, if not create
+    // Ensure admin user exists (check only, don't create here)
     async function ensureAdminExists() {
-      try {
-        const q = query(collection(db, 'users'), where('email', '==', ADMIN_DEFAULTS.email));
-        const snap = await getDocs(q);
-        if (snap.empty) {
-          // Create admin user
-          const adminResult = await signInWithEmailAndPassword(auth, ADMIN_DEFAULTS.email, ADMIN_DEFAULTS.password).catch(async () => {
-            // Try to create
-            const { createUserWithEmailAndPassword, updateProfile } = await import('https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js');
-            const res = await createUserWithEmailAndPassword(auth, ADMIN_DEFAULTS.email, ADMIN_DEFAULTS.password);
-            await updateProfile(res.user, { displayName: ADMIN_DEFAULTS.name });
-            await addDoc(collection(db, 'users'), {
-              uid: res.user.uid,
-              email: ADMIN_DEFAULTS.email,
-              username: 'hexadmin',
-              fullName: ADMIN_DEFAULTS.name,
-              userType: 'admin',
-              role: 'admin',
-              provider: 'email',
-              createdAt: new Date().toISOString()
-            });
-            return;
-          });
-        }
-      } catch (e) {
-        if (e.code !== 'auth/email-already-in-use' && e.code !== 'auth/user-not-found') {
-          console.warn('Admin setup:', e.message);
-        }
-      }
+      // Admin user should already exist from seed or login.html
+      // This is a no-op placeholder for compatibility
     }
 
     // Form submission
@@ -717,8 +680,7 @@
       submitBtn.disabled = true;
 
       try {
-        // Try to sign in as admin
-        await ensureAdminExists();
+        // Sign in as admin
         const result = await signInWithEmailAndPassword(auth, ADMIN_DEFAULTS.email, password);
         
         // Success — redirect to dashboard
