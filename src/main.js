@@ -1,32 +1,133 @@
-//TIP With Search Everywhere, you can find any action, file, or symbol in your project. Press <shortcut actionId="Shift"/> <shortcut actionId="Shift"/>, type in <b>terminal</b>, and press <shortcut actionId="EditorEnter"/>. Then run <shortcut raw="npm run dev"/> in the terminal and click the link in its output to open the app in the browser.
-export function setupCounter(element) {
-  //TIP Try <shortcut actionId="GotoDeclaration"/> on <shortcut raw="counter"/> to see its usages. You can also use this shortcut to jump to a declaration – try it on <shortcut raw="counter"/> on line 13.
-  let counter = 0;
+/* HexStore - lightweight client-side marketplace
+   Features: product grid, search, filters, sort, cart (localStorage)
+*/
 
-  const adjustCounterValue = value => {
-    if (value >= 100) return value - 100;
-    if (value <= -100) return value + 100;
-    return value;
-  };
+const PRODUCTS = [
+  {id:1,title:'Wireless Headphones',price:79.99,brand:'Aurora',img:'https://picsum.photos/seed/p1/400/300',prime:true,stock:12},
+  {id:2,title:'Mechanical Keyboard',price:129.00,brand:'KeyHex',img:'https://picsum.photos/seed/p2/400/300',prime:false,stock:5},
+  {id:3,title:'Smartwatch',price:199.99,brand:'TickPro',img:'https://picsum.photos/seed/p3/400/300',prime:true,stock:0},
+  {id:4,title:'Coffee Maker',price:49.5,brand:'Brewly',img:'https://picsum.photos/seed/p4/400/300',prime:false,stock:8},
+  {id:5,title:'Noise Cancelling Earbuds',price:59.9,brand:'Aurora',img:'https://picsum.photos/seed/p5/400/300',prime:true,stock:20},
+  {id:6,title:'Kids Puzzle 500pcs',price:14.99,brand:'FunBox',img:'https://picsum.photos/seed/p6/400/300',prime:false,stock:15}
+];
 
-  const setCounter = value => {
-    counter = adjustCounterValue(value);
-    //TIP WebStorm has lots of inspections to help you catch issues in your project. It also has quick fixes to help you resolve them. Press <shortcut actionId="ShowIntentionActions"/> on <shortcut raw="text"/> and choose <b>Inline variable</b> to clean up the redundant code.
-    const text = `${counter}`;
-    element.innerHTML = text;
-  };
+let state = {
+  q:'',
+  sort:'relevance',
+  filterPrime:false,
+  filterInStock:false,
+  cart: JSON.parse(localStorage.getItem('hs_cart')||'{}')
+};
 
-  document.getElementById('increaseByOne').addEventListener('click', () => setCounter(counter + 1));
-  document.getElementById('decreaseByOne').addEventListener('click', () => setCounter(counter - 1));
-  document.getElementById('increaseByTwo').addEventListener('click', () => setCounter(counter + 2));
-  //TIP In the app running in the browser, you’ll find that clicking <b>-2</b> doesn't work. To fix that, rewrite it using the code from lines 19 - 21 as examples of the logic.
-  document.getElementById('decreaseByTwo')
+function $(id){return document.getElementById(id)}
 
-  //TIP Let’s see how to review and commit your changes. Press <shortcut actionId="GotoAction"/> and look for <b>commit</b>. Try checking the diff for a file – double-click main.js to do that.
-  setCounter(0);
+function formatPrice(v){return v.toFixed(2)}
+
+function getFiltered(){
+  let list = PRODUCTS.filter(p=>{
+    if(state.filterPrime && !p.prime) return false;
+    if(state.filterInStock && p.stock<=0) return false;
+    if(state.q){
+      const q=state.q.toLowerCase();
+      return p.title.toLowerCase().includes(q)||p.brand.toLowerCase().includes(q);
+    }
+    return true;
+  });
+  if(state.sort==='price-asc') list.sort((a,b)=>a.price-b.price);
+  if(state.sort==='price-desc') list.sort((a,b)=>b.price-a.price);
+  return list;
 }
 
-//TIP To find text strings in your project, you can use the <shortcut actionId="FindInPath"/> shortcut. Press it and type in <b>counter</b> – you’ll get all matches in one place.
-setupCounter(document.getElementById('counter-value'));
+function renderProducts(){
+  const grid = $('products-grid');
+  const list = getFiltered();
+  $('results-count').textContent = list.length;
+  grid.innerHTML='';
+  list.forEach(p=>{
+    const card = document.createElement('div'); card.className='product-card';
+    card.innerHTML = `
+      <img src="${p.img}" alt="${p.title}">
+      <div class="product-title">${p.title}</div>
+      <div class="product-meta">${p.brand} · ${p.stock>0? 'In stock':'Out of stock'}</div>
+      <div class="product-price">$${formatPrice(p.price)}</div>
+      <div class="product-actions">
+        <button class="btn" data-id="${p.id}" data-action="view">View</button>
+        <button class="btn btn-primary" data-id="${p.id}" data-action="add" ${p.stock<=0? 'disabled':''}>Add to cart</button>
+      </div>
+    `;
+    grid.appendChild(card);
+  });
+}
 
-//TIP There's much more in WebStorm to help you be more productive. Press <shortcut actionId="Shift"/> <shortcut actionId="Shift"/> and search for <b>Learn WebStorm</b> to open our learning hub with more things for you to try.
+function saveCart(){
+  localStorage.setItem('hs_cart', JSON.stringify(state.cart));
+  updateCartCount();
+}
+
+function addToCart(id){
+  const pid = String(id);
+  state.cart[pid] = (state.cart[pid]||0)+1;
+  saveCart();
+  renderCartItems();
+}
+
+function removeFromCart(id){
+  const pid=String(id);
+  delete state.cart[pid]; saveCart(); renderCartItems();
+}
+
+function updateCartCount(){
+  const count = Object.values(state.cart).reduce((s,v)=>s+v,0);
+  $('cart-count').textContent = count;
+}
+
+function renderCartItems(){
+  const el = $('cart-items'); el.innerHTML='';
+  let total=0;
+  for(const [id,qty] of Object.entries(state.cart)){
+    const p = PRODUCTS.find(x=>String(x.id)===id); if(!p) continue;
+    total += p.price*qty;
+    const row = document.createElement('div'); row.className='cart-item';
+    row.innerHTML = `
+      <img src="${p.img}" alt="${p.title}">
+      <div style="flex:1">
+        <div style="font-weight:600">${p.title}</div>
+        <div style="font-size:13px;color:#64748b">${qty} × $${formatPrice(p.price)}</div>
+      </div>
+      <div>
+        <button class="btn" data-id="${p.id}" data-action="remove">Remove</button>
+      </div>
+    `;
+    el.appendChild(row);
+  }
+  $('cart-total').textContent = formatPrice(total);
+  updateCartCount();
+}
+
+function toggleCart(show){
+  const drawer = $('cart-drawer');
+  drawer.classList.toggle('hidden', !show);
+}
+
+function bind(){
+  $('search-input').addEventListener('input', e=>{ state.q=e.target.value; renderProducts(); });
+  $('sort-select').addEventListener('change', e=>{ state.sort=e.target.value; renderProducts(); });
+  $('filter-prime').addEventListener('change', e=>{ state.filterPrime=e.target.checked; renderProducts(); });
+  $('filter-instock').addEventListener('change', e=>{ state.filterInStock=e.target.checked; renderProducts(); });
+  $('cart-btn').addEventListener('click', ()=>toggleCart(true));
+  $('checkout-btn')?.addEventListener('click', ()=>{ alert('Checkout is not implemented in this demo'); });
+  document.addEventListener('click', (e)=>{
+    const action = e.target.getAttribute && e.target.getAttribute('data-action');
+    const id = e.target.getAttribute && e.target.getAttribute('data-id');
+    if(action==='add') addToCart(id);
+    if(action==='remove') removeFromCart(id);
+    if(action==='view') alert('Product quick view: '+id);
+  });
+}
+
+function init(){
+  bind(); renderProducts(); renderCartItems(); updateCartCount();
+}
+
+window.addEventListener('DOMContentLoaded', init);
+
