@@ -2157,6 +2157,195 @@ body {
   background: #fee2e2;
 }
 
+/* Password Strength Indicator */
+.password-strength {
+  margin-top: 8px;
+  padding: 12px;
+  background: var(--bg-secondary);
+  border-radius: 8px;
+  border: 1px solid var(--border);
+}
+
+.strength-bar {
+  height: 4px;
+  background: var(--border);
+  border-radius: 2px;
+  margin-bottom: 8px;
+  overflow: hidden;
+}
+
+.strength-fill {
+  height: 100%;
+  width: 0%;
+  border-radius: 2px;
+  transition: all 0.3s ease;
+}
+
+.strength-fill.level-weak {
+  background: var(--danger);
+}
+
+.strength-fill.level-medium {
+  background: var(--warning);
+}
+
+.strength-fill.level-strong {
+  background: var(--success);
+}
+
+.strength-text {
+  font-size: 12px;
+  color: var(--text-secondary);
+  margin-bottom: 8px;
+}
+
+.strength-label.level-weak {
+  color: var(--danger);
+}
+
+.strength-label.level-medium {
+  color: var(--warning);
+}
+
+.strength-label.level-strong {
+  color: var(--success);
+}
+
+.password-checks {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 4px;
+}
+
+.check-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  color: var(--text-tertiary);
+  transition: all 0.2s;
+}
+
+.check-item.passed {
+  color: var(--success);
+}
+
+.check-item i {
+  font-size: 10px;
+}
+
+.check-item.passed i {
+  color: var(--success);
+}
+
+/* Form Error States */
+.form-error {
+  display: block;
+  font-size: 12px;
+  color: var(--danger);
+  margin-top: 4px;
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+
+.form-error.visible {
+  opacity: 1;
+}
+
+.input-icon.has-error input {
+  border-color: var(--danger);
+}
+
+.input-icon.has-error i {
+  color: var(--danger);
+}
+
+input.error {
+  border-color: var(--danger) !important;
+}
+
+/* Toggle Password Button */
+.input-icon-toggle {
+  position: relative;
+}
+
+.toggle-password {
+  position: absolute;
+  right: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  color: var(--text-tertiary);
+  cursor: pointer;
+  padding: 4px;
+  transition: color 0.2s;
+}
+
+.toggle-password:hover {
+  color: var(--text-primary);
+}
+
+/* User Type Card Enhanced */
+.user-type-card {
+  padding: 20px 16px;
+}
+
+.user-type-icon {
+  width: 48px;
+  height: 48px;
+  margin: 0 auto 8px;
+  background: var(--bg-tertiary);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s;
+}
+
+.user-type-option input:checked + .user-type-card .user-type-icon {
+  background: rgba(15, 111, 255, 0.1);
+}
+
+.user-type-card i {
+  font-size: 20px;
+  margin-bottom: 0;
+}
+
+/* Auth Footer Text */
+.auth-footer-text {
+  text-align: center;
+  margin-top: 20px;
+  font-size: 13px;
+  color: var(--text-secondary);
+}
+
+.auth-footer-text a {
+  color: var(--primary);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.auth-footer-text a:hover {
+  text-decoration: underline;
+}
+
+/* Enhanced Checkbox */
+.checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  font-size: 13px;
+  color: var(--text-secondary);
+}
+
+.checkbox-label input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  accent-color: var(--primary);
+}
+
 /* Enhanced Toast Notifications */
 .toast-container {
   position: fixed;
