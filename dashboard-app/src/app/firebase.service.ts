@@ -4,7 +4,7 @@ import { Injectable } from '@angular/core';
 import { initializeApp, FirebaseApp } from 'firebase/app';
 import { getFirestore, collection, getDocs, addDoc, doc, setDoc, Firestore } from 'firebase/firestore/lite';
 import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut, onAuthStateChanged, updateProfile, User, updatePassword } from 'firebase/auth';
-import { environment } from '../../environments/environment';
+import { environment } from '../environments/environment';
 
 @Injectable({ providedIn: 'root' })
 export class FirebaseService {
