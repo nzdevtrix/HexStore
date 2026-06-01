@@ -97,4 +97,46 @@ export class FirebaseService {
     if (!this.db) throw new Error('Firestore not configured');
     return addDoc(collection(this.db, 'users'), data);
   }
+
+  async getUserByUid(uid: string) {
+    if (!this.db) return null;
+    const col = collection(this.db, 'users');
+    const snap = await getDocs(col);
+    let found: any = null;
+    snap.forEach(d => { const data: any = d.data(); if (data.uid === uid) found = { id: d.id, ...data }; });
+    return found;
+  }
+
+  async deleteUserDoc(docId: string) {
+    if (!this.db) throw new Error('Firestore not configured');
+    const { deleteDoc } = await import('firebase/firestore/lite');
+    await deleteDoc(doc(this.db, 'users', docId));
+  }
+
+  async listProducts() {
+    if (!this.db) return [];
+    try {
+      const col = collection(this.db, 'products');
+      const snap = await getDocs(col);
+      const out: any[] = [];
+      snap.forEach(d => out.push({ id: d.id, ...d.data() }));
+      return out;
+    } catch { return []; }
+  }
+
+  async listOrders() {
+    if (!this.db) return [];
+    try {
+      const col = collection(this.db, 'orders');
+      const snap = await getDocs(col);
+      const out: any[] = [];
+      snap.forEach(d => out.push({ id: d.id, ...d.data() }));
+      return out;
+    } catch { return []; }
+  }
+
+  async softDeleteProduct(productId: string) {
+    if (!this.db) return;
+    await setDoc(doc(this.db, 'products', productId), { deleted: true }, { merge: true } as any);
+  }
 }

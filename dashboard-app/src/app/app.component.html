@@ -1,49 +1,281 @@
-<div class="app-header">
-  <div class="container">
-    <h1>{{title}}</h1>
+<div class="admin-header">
+  <div class="admin-header-inner">
+    <div class="admin-brand">
+      <i class="fas fa-shield-alt"></i>
+      <div>
+        <h1>HexStore Admin</h1>
+        <span class="admin-badge">FULL DATABASE ACCESS</span>
+      </div>
+    </div>
+    <div class="admin-user">
+      <span><i class="fas fa-user"></i> {{ currentUser?.email }}</span>
+      <button class="btn btn-outline" (click)="signOut()"><i class="fas fa-sign-out-alt"></i> Sign Out</button>
+    </div>
   </div>
 </div>
-<div class="container">
-  <div class="metrics">
-    <div class="metric">
-      <h3>Total Accounts</h3>
-      <div style="font-size:28px;font-weight:700">{{metrics.users}}</div>
+
+<div class="admin-container" *ngIf="isAdmin">
+  <!-- Mega Stats -->
+  <div class="mega-stats">
+    <div class="mega-stat">
+      <div class="mega-icon" style="background:rgba(59,130,246,0.1);color:#3b82f6">
+        <i class="fas fa-users"></i>
+      </div>
+      <div class="mega-info">
+        <div class="mega-value">{{ metrics.users }}</div>
+        <div class="mega-label">Total Users</div>
+      </div>
+      <div class="mega-breakdown">
+        <span><i class="fas fa-store"></i> {{ metrics.sellers }} sellers</span>
+        <span><i class="fas fa-user"></i> {{ metrics.buyers }} buyers</span>
+      </div>
     </div>
-    <div class="metric">
-      <h3>Sellers</h3>
-      <div style="font-size:28px;font-weight:700">{{metrics.sellers}}</div>
+    <div class="mega-stat">
+      <div class="mega-icon" style="background:rgba(16,185,129,0.1);color:#10b981">
+        <i class="fas fa-box"></i>
+      </div>
+      <div class="mega-info">
+        <div class="mega-value">{{ metrics.products }}</div>
+        <div class="mega-label">Total Products</div>
+      </div>
+      <div class="mega-breakdown">
+        <span><i class="fas fa-check"></i> Active listings</span>
+      </div>
     </div>
-    <div class="metric">
-      <h3>Buyers</h3>
-      <div style="font-size:28px;font-weight:700">{{metrics.buyers}}</div>
+    <div class="mega-stat">
+      <div class="mega-icon" style="background:rgba(245,158,11,0.1);color:#f59e0b">
+        <i class="fas fa-shopping-cart"></i>
+      </div>
+      <div class="mega-info">
+        <div class="mega-value">{{ metrics.orders }}</div>
+        <div class="mega-label">Total Orders</div>
+      </div>
+      <div class="mega-breakdown">
+        <span><i class="fas fa-dollar-sign"></i> {{ formatPrice(metrics.revenue) }} revenue</span>
+      </div>
+    </div>
+    <div class="mega-stat">
+      <div class="mega-icon" style="background:rgba(239,68,68,0.1);color:#ef4444">
+        <i class="fas fa-database"></i>
+      </div>
+      <div class="mega-info">
+        <div class="mega-value">Active</div>
+        <div class="mega-label">Firebase Status</div>
+      </div>
+      <div class="mega-breakdown">
+        <span><i class="fas fa-check-circle" style="color:#10b981"></i> All systems operational</span>
+      </div>
     </div>
   </div>
 
-  <div class="table">
-    <h3>Accounts</h3>
-    <table width="100%">
-      <thead>
-        <tr>
-          <th>Name</th>
-          <th>Email</th>
-          <th>Role</th>
-          <th>Phone</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr *ngFor="let u of users">
-          <td>{{u.name}}</td>
-          <td>{{u.email}}</td>
-          <td>{{u.role}}</td>
-          <td>{{u.phone}}</td>
-        </tr>
-        <tr *ngIf="users.length===0">
-          <td colspan="4" style="text-align:center;color:#64748b">No accounts (Firebase not configured or empty)</td>
-        </tr>
-      </tbody>
-    </table>
+  <!-- Admin Tab Navigation -->
+  <div class="admin-tabs">
+    <button class="admin-tab" [class.active]="selectedTab==='overview'" (click)="selectedTab='overview'">
+      <i class="fas fa-chart-pie"></i> Overview
+    </button>
+    <button class="admin-tab" [class.active]="selectedTab==='users'" (click)="selectedTab='users'">
+      <i class="fas fa-users"></i> Users <span class="tab-badge">{{ metrics.users }}</span>
+    </button>
+    <button class="admin-tab" [class.active]="selectedTab==='products'" (click)="selectedTab='products'">
+      <i class="fas fa-box"></i> Products <span class="tab-badge">{{ metrics.products }}</span>
+    </button>
+    <button class="admin-tab" [class.active]="selectedTab==='orders'" (click)="selectedTab='orders'">
+      <i class="fas fa-truck"></i> Orders <span class="tab-badge">{{ metrics.orders }}</span>
+    </button>
+    <button class="admin-tab" [class.active]="selectedTab==='system'" (click)="selectedTab='system'">
+      <i class="fas fa-cog"></i> System
+    </button>
   </div>
 
-  <!-- Account editor / login -->
-  <app-account></app-account>
+  <!-- OVERVIEW TAB -->
+  <div class="admin-content" *ngIf="selectedTab==='overview'">
+    <div class="overview-grid">
+      <div class="overview-card">
+        <h4><i class="fas fa-users"></i> User Distribution</h4>
+        <div class="pie-chart">
+          <div class="pie-segment" style="--pct: {{ metrics.sellers / (metrics.users || 1) * 100 }}; --color: #3b82f6">
+            <span>Sellers {{ (metrics.sellers / (metrics.users || 1) * 100).toFixed(1) }}%</span>
+          </div>
+          <div class="pie-segment" style="--pct: {{ metrics.buyers / (metrics.users || 1) * 100 }}; --color: #10b981">
+            <span>Buyers {{ (metrics.buyers / (metrics.users || 1) * 100).toFixed(1) }}%</span>
+          </div>
+        </div>
+      </div>
+      <div class="overview-card">
+        <h4><i class="fas fa-database"></i> Database Collections</h4>
+        <div class="db-collections">
+          <div class="db-collection"><span>users</span><span class="count">{{ metrics.users }}</span></div>
+          <div class="db-collection"><span>products</span><span class="count">{{ metrics.products }}</span></div>
+          <div class="db-collection"><span>orders</span><span class="count">{{ metrics.orders }}</span></div>
+        </div>
+      </div>
+      <div class="overview-card full-width">
+        <h4><i class="fas fa-history"></i> Recent Activity</h4>
+        <div class="activity-feed">
+          <div class="activity-item" *ngFor="let o of orders.slice(0, 5)">
+            <i class="fas fa-shopping-bag"></i>
+            <span>Order #{{ o.id?.substr(0, 8) }} — {{ o.customerName || 'Unknown' }} — {{ formatPrice(o.total) }}</span>
+            <span class="activity-status" [class.pending]="o.status==='pending'" [class.completed]="o.status==='completed'">{{ o.status }}</span>
+          </div>
+          <div class="activity-empty" *ngIf="orders.length === 0">No recent activity</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- USERS TAB -->
+  <div class="admin-content" *ngIf="selectedTab==='users'">
+    <div class="admin-table-toolbar">
+      <h4><i class="fas fa-users"></i> All Users <small>({{ metrics.users }} total)</small></h4>
+    </div>
+    <div class="admin-table-wrap">
+      <table class="admin-table">
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Email</th>
+            <th>Role</th>
+            <th>Account Type</th>
+            <th>Created</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let u of users">
+            <td><strong>{{ u.fullName || u.name || u.username || 'N/A' }}</strong></td>
+            <td>{{ u.email }}</td>
+            <td><span class="role-badge" [class.admin]="u.role==='admin'||u.userType==='admin'" [class.seller]="u.role==='seller'||u.userType==='seller'" [class.buyer]="u.role==='buyer'||u.userType==='buyer'">{{ u.role || u.userType || 'unknown' }}</span></td>
+            <td>{{ u.provider || 'email' }}</td>
+            <td>{{ u.createdAt ? (u.createdAt | date:'shortDate') : 'N/A' }}</td>
+            <td>
+              <button class="btn btn-sm btn-danger" (click)="deleteUser(u.id)" *ngIf="u.role !== 'admin'">
+                <i class="fas fa-trash"></i>
+              </button>
+            </td>
+          </tr>
+          <tr *ngIf="users.length === 0">
+            <td colspan="6" class="empty-cell">No users found in database</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- PRODUCTS TAB -->
+  <div class="admin-content" *ngIf="selectedTab==='products'">
+    <div class="admin-table-toolbar">
+      <h4><i class="fas fa-box"></i> All Products <small>({{ metrics.products }} total)</small></h4>
+    </div>
+    <div class="admin-table-wrap">
+      <table class="admin-table">
+        <thead>
+          <tr>
+            <th>Title</th>
+            <th>Seller</th>
+            <th>Category</th>
+            <th>Price</th>
+            <th>Stock</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let p of products">
+            <td><strong>{{ p.title }}</strong></td>
+            <td>{{ p.sellerName || p.sellerId?.substr(0, 8) || 'N/A' }}</td>
+            <td>{{ p.category }}</td>
+            <td>{{ formatPrice(p.price) }}</td>
+            <td>
+              <span [style.color]="(p.stock || 0) > 0 ? '#10b981' : '#ef4444'">
+                {{ (p.stock || 0) > 0 ? p.stock + ' in stock' : 'Out of stock' }}
+              </span>
+            </td>
+            <td>
+              <button class="btn btn-sm btn-danger" (click)="deleteProduct(p.id)">
+                <i class="fas fa-trash"></i> Remove
+              </button>
+            </td>
+          </tr>
+          <tr *ngIf="products.length === 0">
+            <td colspan="6" class="empty-cell">No products found</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ORDERS TAB -->
+  <div class="admin-content" *ngIf="selectedTab==='orders'">
+    <div class="admin-table-toolbar">
+      <h4><i class="fas fa-truck"></i> All Orders <small>({{ metrics.orders }} total)</small></h4>
+    </div>
+    <div class="admin-table-wrap">
+      <table class="admin-table">
+        <thead>
+          <tr>
+            <th>Order ID</th>
+            <th>Customer</th>
+            <th>Seller</th>
+            <th>Items</th>
+            <th>Total</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let o of orders">
+            <td><code>#{{ o.id?.substr(0, 10) }}</code></td>
+            <td>{{ o.customerName || o.buyerId?.substr(0, 8) || 'N/A' }}</td>
+            <td>{{ o.sellerName || o.sellerId?.substr(0, 8) || 'N/A' }}</td>
+            <td>{{ o.itemCount || 0 }}</td>
+            <td>{{ formatPrice(o.total) }}</td>
+            <td><span class="role-badge" [class.admin]="o.status==='completed'" [class.seller]="o.status==='shipped'" [class.buyer]="o.status==='pending'">{{ o.status || 'pending' }}</span></td>
+          </tr>
+          <tr *ngIf="orders.length === 0">
+            <td colspan="6" class="empty-cell">No orders found</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- SYSTEM TAB -->
+  <div class="admin-content" *ngIf="selectedTab==='system'">
+    <div class="system-grid">
+      <div class="system-card">
+        <h4><i class="fas fa-fire"></i> Firebase Project</h4>
+        <div class="sys-info">
+          <div><span>Project ID:</span> <code>hexstore-8d6b2</code></div>
+          <div><span>Auth:</span> <span style="color:#10b981">Email/Password enabled</span></div>
+          <div><span>Database:</span> <span style="color:#10b981">Firestore active</span></div>
+          <div><span>Collections:</span> <code>users, products, orders</code></div>
+        </div>
+      </div>
+      <div class="system-card">
+        <h4><i class="fas fa-shield-alt"></i> Admin Access</h4>
+        <div class="sys-info">
+          <div><span>Admin Portal:</span> <a href="/access/db/only-hexadmin/admin/dev/main/access.html" target="_blank">Open Admin Login</a></div>
+          <div><span>Admin Code:</span> <code>hx2984293a239</code></div>
+          <div><span>Default Password:</span> <code>password</code></div>
+          <div><span>Email:</span> <code>admin@hexstore.io</code></div>
+        </div>
+      </div>
+      <div class="system-card">
+        <h4><i class="fas fa-users"></i> Test Accounts</h4>
+        <div class="sys-info">
+          <div><span>John Doe:</span> <code>john.doe@email.io</code> / <code>TestPass123!</code></div>
+          <div><span>Role:</span> <span class="role-badge seller">Seller</span></div>
+          <div><span>Store:</span> JD Electronics</div>
+          <div><span>Admin:</span> <code>admin@hexstore.io</code> / <code>password</code></div>
+        </div>
+      </div>
+      <div class="system-card">
+        <h4><i class="fas fa-chart-line"></i> System Metrics</h4>
+        <div class="sys-info">
+          <div><span>Total Users:</span> <strong>{{ metrics.users }}</strong></div>
+          <div><span>Total Products:</span> <strong>{{ metrics.products }}</strong></div>
+          <div><span>Total Orders:</span> <strong>{{ metrics.orders }}</strong></div>
+          <div><span>Total Revenue:</span> <strong>{{ formatPrice(metrics.revenue) }}</strong></div>
+        </div>
+      </div>
+    </div>
+  </div>
 </div>

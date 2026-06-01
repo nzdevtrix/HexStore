@@ -4,9 +4,22 @@
   <meta charset="utf-8">
   <title>HexStore Dashboard</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    /* Global loading state */
+    body { margin: 0; font-family: 'Inter', 'Segoe UI', Roboto, Arial, sans-serif; background: #f7fafc; }
+    app-root > :first-child {
+      display: flex; align-items: center; justify-content: center; min-height: 100vh;
+      color: #64748b; font-size: 16px;
+    }
+  </style>
 </head>
 <body>
-  <app-root>Loading...</app-root>
-  <!-- Angular will bootstrap here -->
+  <app-root>
+    <div style="text-align:center;padding:40px">
+      <i class="fas fa-cube" style="font-size:40px;color:#0f6fff;margin-bottom:12px;display:block"></i>
+      <span>Loading HexStore Dashboard...</span>
+    </div>
+  </app-root>
 </body>
 </html>

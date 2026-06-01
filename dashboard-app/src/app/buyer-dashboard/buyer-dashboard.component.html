@@ -1,0 +1,107 @@
+<div class="b-dash-header">
+  <div class="b-dash-header-inner">
+    <div class="b-dash-brand">
+      <div class="b-avatar">{{ getInitials(user?.displayName || user?.email) }}</div>
+      <div>
+        <h2>{{ user?.displayName || 'My Account' }}</h2>
+        <span class="b-badge">BUYER DASHBOARD</span>
+      </div>
+    </div>
+    <div class="b-dash-user">
+      <span>{{ user?.email }}</span>
+      <button class="btn btn-outline btn-sm" (click)="signOut()">Sign Out</button>
+    </div>
+  </div>
+</div>
+
+<div class="b-dash-container">
+  <!-- Tab Navigation -->
+  <div class="b-tab-nav">
+    <button class="b-tab-btn" [class.active]="selectedTab==='orders'" (click)="selectedTab='orders'">
+      <i class="fas fa-shopping-bag"></i> My Orders
+    </button>
+    <button class="b-tab-btn" [class.active]="selectedTab==='wishlist'" (click)="selectedTab='wishlist'">
+      <i class="fas fa-heart"></i> Wishlist
+    </button>
+    <button class="b-tab-btn" [class.active]="selectedTab==='settings'" (click)="selectedTab='settings'">
+      <i class="fas fa-user-cog"></i> Account
+    </button>
+  </div>
+
+  <!-- ORDERS TAB -->
+  <div class="b-tab-content" *ngIf="selectedTab==='orders'">
+    <div class="b-section-header">
+      <h3><i class="fas fa-shopping-bag"></i> Order History</h3>
+    </div>
+    <div class="b-orders-list" *ngIf="orders.length > 0">
+      <div class="b-order-card" *ngFor="let o of orders">
+        <div class="b-order-header">
+          <div>
+            <strong>Order #{{ o.id?.substr(0, 10) }}</strong>
+            <span class="b-order-date">{{ o.createdAt ? (o.createdAt | date:'mediumDate') : 'N/A' }}</span>
+          </div>
+          <span class="b-status" [class.pending]="o.status==='pending'" 
+                [class.shipped]="o.status==='shipped'" 
+                [class.completed]="o.status==='completed'">
+            {{ o.status || 'pending' | uppercase }}
+          </span>
+        </div>
+        <div class="b-order-items" *ngIf="o.items">
+          <div class="b-order-item" *ngFor="let item of (o.items || [])">
+            <span>{{ item.title || item.name }}</span>
+            <span>x{{ item.quantity || 1 }}</span>
+            <span>{{ formatPrice(item.price || 0) }}</span>
+          </div>
+        </div>
+        <div class="b-order-total">
+          <span>Total</span>
+          <strong>{{ formatPrice(o.total || 0) }}</strong>
+        </div>
+      </div>
+    </div>
+    <div class="b-empty" *ngIf="orders.length === 0">
+      <i class="fas fa-inbox"></i>
+      <h4>No Orders Yet</h4>
+      <p>Start shopping at HexStore and your orders will appear here</p>
+      <a href="/index.html" class="btn btn-primary"><i class="fas fa-store"></i> Browse Products</a>
+    </div>
+  </div>
+
+  <!-- WISHLIST TAB -->
+  <div class="b-tab-content" *ngIf="selectedTab==='wishlist'">
+    <div class="b-section-header">
+      <h3><i class="fas fa-heart"></i> My Wishlist</h3>
+    </div>
+    <div class="b-empty">
+      <i class="fas fa-heart" style="color:#f5576c"></i>
+      <h4>Your Wishlist is Empty</h4>
+      <p>Save your favorite items to come back to them later</p>
+      <a href="/index.html" class="btn btn-primary"><i class="fas fa-store"></i> Browse Products</a>
+    </div>
+  </div>
+
+  <!-- SETTINGS TAB -->
+  <div class="b-tab-content" *ngIf="selectedTab==='settings'">
+    <div class="b-section-header">
+      <h3><i class="fas fa-user-cog"></i> Account Settings</h3>
+    </div>
+    <div class="b-settings-card">
+      <div class="b-setting-row">
+        <div class="b-setting-label">Name</div>
+        <div class="b-setting-value">{{ userDoc?.fullName || user?.displayName || 'Not set' }}</div>
+      </div>
+      <div class="b-setting-row">
+        <div class="b-setting-label">Email</div>
+        <div class="b-setting-value">{{ user?.email }}</div>
+      </div>
+      <div class="b-setting-row">
+        <div class="b-setting-label">Account Type</div>
+        <div class="b-setting-value">{{ (userDoc?.userType || 'buyer') | uppercase }}</div>
+      </div>
+      <div class="b-setting-row">
+        <div class="b-setting-label">Member Since</div>
+        <div class="b-setting-value">{{ userDoc?.createdAt ? (userDoc.createdAt | date:'longDate') : 'N/A' }}</div>
+      </div>
+    </div>
+  </div>
+</div>

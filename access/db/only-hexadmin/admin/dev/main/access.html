@@ -1,0 +1,754 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>HexStore Admin Access</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap');
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --primary: #0f6fff;
+      --secondary: #667eea;
+      --accent: #00d4ff;
+      --danger: #ff3366;
+      --success: #00e676;
+      --warning: #ffab00;
+      --bg-deep: #0a0e1a;
+      --bg-card: #111827;
+      --bg-surface: #1a1f2e;
+      --border: #1e293b;
+      --text: #e2e8f0;
+      --text-dim: #64748b;
+      --glow: 0 0 40px rgba(15, 111, 255, 0.15);
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--bg-deep);
+      color: var(--text);
+      min-height: 100vh;
+      overflow: hidden;
+    }
+
+    /* Matrix Rain Background */
+    .matrix-bg {
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      opacity: 0.04;
+      background: 
+        repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0, 212, 255, 0.1) 2px, rgba(0, 212, 255, 0.1) 4px);
+      animation: matrixScroll 20s linear infinite;
+    }
+
+    @keyframes matrixScroll {
+      0% { transform: translateY(0); }
+      100% { transform: translateY(-50%); }
+    }
+
+    /* Grid overlay */
+    .grid-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 1;
+      background-image: 
+        linear-gradient(rgba(15, 111, 255, 0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(15, 111, 255, 0.03) 1px, transparent 1px);
+      background-size: 40px 40px;
+      pointer-events: none;
+    }
+
+    /* Animated particles */
+    .particles {
+      position: fixed;
+      inset: 0;
+      z-index: 1;
+      pointer-events: none;
+      overflow: hidden;
+    }
+
+    .particle {
+      position: absolute;
+      width: 3px;
+      height: 3px;
+      background: var(--accent);
+      border-radius: 50%;
+      animation: floatParticle linear infinite;
+      opacity: 0.4;
+    }
+
+    @keyframes floatParticle {
+      0% { transform: translateY(100vh) scale(0); opacity: 0; }
+      10% { opacity: 0.6; }
+      90% { opacity: 0.6; }
+      100% { transform: translateY(-10vh) scale(1); opacity: 0; }
+    }
+
+    .particle:nth-child(1) { left: 10%; animation-duration: 18s; animation-delay: 0s; }
+    .particle:nth-child(2) { left: 25%; animation-duration: 22s; animation-delay: 3s; width: 2px; height: 2px; }
+    .particle:nth-child(3) { left: 40%; animation-duration: 16s; animation-delay: 6s; }
+    .particle:nth-child(4) { left: 55%; animation-duration: 20s; animation-delay: 1s; width: 4px; height: 4px; }
+    .particle:nth-child(5) { left: 70%; animation-duration: 24s; animation-delay: 8s; }
+    .particle:nth-child(6) { left: 85%; animation-duration: 19s; animation-delay: 4s; width: 2px; height: 2px; }
+    .particle:nth-child(7) { left: 50%; animation-duration: 21s; animation-delay: 10s; }
+    .particle:nth-child(8) { left: 15%; animation-duration: 17s; animation-delay: 5s; width: 4px; height: 4px; }
+
+    .access-container {
+      position: relative;
+      z-index: 2;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    /* Top status bar */
+    .status-bar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 10;
+      padding: 10px 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: rgba(10, 14, 26, 0.9);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border);
+      font-size: 12px;
+      color: var(--text-dim);
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    .status-bar .status-dot {
+      display: inline-block;
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--success);
+      margin-right: 8px;
+      animation: pulse 1.5s ease-in-out infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.4; }
+    }
+
+    .status-bar .sys-time {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .access-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 48px;
+      width: 100%;
+      max-width: 480px;
+      box-shadow: var(--glow), 0 20px 60px rgba(0, 0, 0, 0.5);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .access-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: linear-gradient(90deg, transparent, var(--accent), var(--primary), transparent);
+    }
+
+    .access-card::after {
+      content: '';
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: conic-gradient(from 0deg, transparent, rgba(15, 111, 255, 0.03), transparent, rgba(0, 212, 255, 0.03), transparent);
+      animation: rotateGlow 20s linear infinite;
+      pointer-events: none;
+    }
+
+    @keyframes rotateGlow {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    .access-header {
+      text-align: center;
+      margin-bottom: 36px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .access-header .shield-icon {
+      width: 72px;
+      height: 72px;
+      margin: 0 auto 20px;
+      background: linear-gradient(135deg, rgba(15, 111, 255, 0.15), rgba(0, 212, 255, 0.1));
+      border: 1px solid rgba(15, 111, 255, 0.3);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 32px;
+      color: var(--accent);
+      animation: shieldPulse 3s ease-in-out infinite;
+    }
+
+    @keyframes shieldPulse {
+      0%, 100% { box-shadow: 0 0 20px rgba(0, 212, 255, 0.2); }
+      50% { box-shadow: 0 0 40px rgba(0, 212, 255, 0.4); }
+    }
+
+    .access-header h1 {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 18px;
+      font-weight: 700;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: var(--text);
+      margin-bottom: 8px;
+    }
+
+    .access-header h1 span {
+      color: var(--accent);
+    }
+
+    .access-header .subtitle {
+      font-size: 13px;
+      color: var(--text-dim);
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    .access-header .subtitle i {
+      margin-right: 6px;
+      color: var(--danger);
+    }
+
+    .access-form {
+      position: relative;
+      z-index: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .input-group {
+      position: relative;
+    }
+
+    .input-group label {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-dim);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 8px;
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    .input-group label i {
+      font-size: 14px;
+      color: var(--primary);
+    }
+
+    .input-group input {
+      width: 100%;
+      padding: 14px 16px 14px 44px;
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      color: var(--text);
+      font-size: 14px;
+      font-family: 'JetBrains Mono', monospace;
+      transition: all 0.3s ease;
+      outline: none;
+    }
+
+    .input-group input:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(0, 212, 255, 0.1);
+    }
+
+    .input-group input::placeholder {
+      color: rgba(100, 116, 139, 0.5);
+    }
+
+    .input-group .input-icon-left {
+      position: absolute;
+      left: 16px;
+      top: 44px;
+      color: var(--text-dim);
+      font-size: 14px;
+      pointer-events: none;
+    }
+
+    .input-group .input-status {
+      position: absolute;
+      right: 16px;
+      top: 44px;
+      font-size: 12px;
+      color: var(--text-dim);
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+
+    .input-group .input-status.visible {
+      opacity: 1;
+    }
+
+    .input-group .input-status.valid {
+      color: var(--success);
+    }
+
+    .input-group .input-status.invalid {
+      color: var(--danger);
+    }
+
+    .admin-submit-btn {
+      padding: 16px;
+      background: linear-gradient(135deg, var(--primary), var(--secondary));
+      border: none;
+      border-radius: 10px;
+      color: white;
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      position: relative;
+      overflow: hidden;
+      font-family: 'JetBrains Mono', monospace;
+      letter-spacing: 1px;
+    }
+
+    .admin-submit-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 30px rgba(15, 111, 255, 0.4);
+    }
+
+    .admin-submit-btn:active {
+      transform: translateY(0);
+    }
+
+    .admin-submit-btn:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .admin-submit-btn .spinner {
+      display: none;
+      width: 18px;
+      height: 18px;
+      border: 2px solid rgba(255,255,255,0.3);
+      border-top-color: white;
+      border-radius: 50%;
+      animation: spin 0.6s linear infinite;
+    }
+
+    .admin-submit-btn.loading .spinner {
+      display: inline-block;
+    }
+
+    .admin-submit-btn.loading .btn-text {
+      display: none;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    .access-footer {
+      text-align: center;
+      margin-top: 24px;
+      font-size: 11px;
+      color: var(--text-dim);
+      font-family: 'JetBrains Mono', monospace;
+      position: relative;
+      z-index: 1;
+    }
+
+    .access-footer .lock-info {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      margin-bottom: 8px;
+    }
+
+    .access-footer .lock-info i {
+      color: var(--success);
+      font-size: 12px;
+    }
+
+    .error-message {
+      background: rgba(255, 51, 102, 0.1);
+      border: 1px solid rgba(255, 51, 102, 0.3);
+      border-radius: 8px;
+      padding: 12px 16px;
+      font-size: 13px;
+      color: var(--danger);
+      display: none;
+      font-family: 'JetBrains Mono', monospace;
+      position: relative;
+      z-index: 1;
+    }
+
+    .error-message.visible {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .success-message {
+      display: none;
+    }
+
+    /* Session info after login */
+    .session-info {
+      position: fixed;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 10;
+      font-size: 11px;
+      color: rgba(100, 116, 139, 0.4);
+      font-family: 'JetBrains Mono', monospace;
+      letter-spacing: 0.5px;
+    }
+
+    @media (max-width: 480px) {
+      .access-card {
+        padding: 32px 24px;
+        border-radius: 12px;
+      }
+      .access-header .shield-icon {
+        width: 56px;
+        height: 56px;
+        font-size: 24px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="matrix-bg"></div>
+  <div class="grid-overlay"></div>
+  <div class="particles">
+    <div class="particle"></div>
+    <div class="particle"></div>
+    <div class="particle"></div>
+    <div class="particle"></div>
+    <div class="particle"></div>
+    <div class="particle"></div>
+    <div class="particle"></div>
+    <div class="particle"></div>
+  </div>
+
+  <!-- Status Bar -->
+  <div class="status-bar">
+    <div>
+      <span class="status-dot"></span>
+      <span>HEXSTORE CORE — SECURE CONNECTION ACTIVE</span>
+    </div>
+    <div class="sys-time">
+      <span><i class="fas fa-database"></i> DB: PRODUCTION</span>
+      <span id="sys-clock"><i class="fas fa-clock"></i> --:--:--</span>
+    </div>
+  </div>
+
+  <div class="access-container">
+    <div class="access-card">
+      <!-- Header -->
+      <div class="access-header">
+        <div class="shield-icon">
+          <i class="fas fa-shield-hal"></i>
+        </div>
+        <h1>HEX<span>ADMIN</span></h1>
+        <div class="subtitle">
+          <i class="fas fa-lock"></i> PRIVILEGED ACCESS — DEVELOPER / ADMIN ONLY
+        </div>
+      </div>
+
+      <!-- Error Message -->
+      <div class="error-message" id="error-message">
+        <i class="fas fa-exclamation-triangle"></i>
+        <span id="error-text">Invalid credentials</span>
+      </div>
+
+      <!-- Login Form -->
+      <form class="access-form" id="admin-login-form" autocomplete="off">
+        <div class="input-group">
+          <label><i class="fas fa-key"></i> Admin Access Code</label>
+          <i class="fas fa-terminal input-icon-left"></i>
+          <input 
+            type="password" 
+            id="admin-code" 
+            placeholder="Enter admin access code" 
+            required
+            autocomplete="off"
+          />
+          <span class="input-status" id="code-status">
+            <i class="fas fa-check"></i>
+          </span>
+        </div>
+
+        <div class="input-group">
+          <label><i class="fas fa-lock"></i> Password</label>
+          <i class="fas fa-asterisk input-icon-left"></i>
+          <input 
+            type="password" 
+            id="admin-password" 
+            placeholder="Enter admin password" 
+            required
+            autocomplete="off"
+          />
+          <span class="input-status" id="password-status">
+            <i class="fas fa-check"></i>
+          </span>
+        </div>
+
+        <button type="submit" class="admin-submit-btn" id="admin-submit-btn">
+          <span class="spinner"></span>
+          <span class="btn-text"><i class="fas fa-sign-in-alt"></i> AUTHENTICATE & ENTER</span>
+        </button>
+      </form>
+
+      <div class="access-footer">
+        <div class="lock-info">
+          <i class="fas fa-lock"></i>
+          <span>AES-256 ENCRYPTED CONNECTION</span>
+        </div>
+        <div>UNAUTHORIZED ACCESS IS STRICTLY PROHIBITED</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="session-info" id="session-info">
+    SESSION: <span id="session-id">---</span> | IP: <span id="client-ip">---</span>
+  </div>
+
+  <script type="module">
+    import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js';
+    import { 
+      getAuth, 
+      signInWithEmailAndPassword,
+      onAuthStateChanged
+    } from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js';
+    import {
+      getFirestore,
+      collection,
+      getDocs,
+      query,
+      where,
+      doc,
+      setDoc,
+      addDoc,
+      getDoc
+    } from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js';
+
+    const FIREBASE_CONFIG = {
+      apiKey: "AIzaSyACtpVKGa85P3c62th7u3GJpmk88Fk7tWM",
+      authDomain: "hexstore-8d6b2.firebaseapp.com",
+      projectId: "hexstore-8d6b2",
+      storageBucket: "hexstore-8d6b2.firebasestorage.app",
+      messagingSenderId: "968717146641",
+      appId: "1:968717146641:web:44ebf1bb1bc2453f5eafb0",
+      measurementId: "G-HEFK09SM1C"
+    };
+
+    const ADMIN_DEFAULTS = {
+      code: 'hx2984293a239',
+      password: 'password',
+      email: 'admin@hexstore.io',
+      name: 'HexStore Admin'
+    };
+
+    const app = initializeApp(FIREBASE_CONFIG);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+
+    // Elements
+    const form = document.getElementById('admin-login-form');
+    const codeInput = document.getElementById('admin-code');
+    const passwordInput = document.getElementById('admin-password');
+    const submitBtn = document.getElementById('admin-submit-btn');
+    const errorMsg = document.getElementById('error-message');
+    const errorText = document.getElementById('error-text');
+    const sessionIdEl = document.getElementById('session-id');
+    const clientIpEl = document.getElementById('client-ip');
+
+    // Sys clock
+    function updateClock() {
+      const now = new Date();
+      document.getElementById('sys-clock').innerHTML = `<i class="fas fa-clock"></i> ${now.toLocaleTimeString('en-US', { hour12: false })}`;
+    }
+    setInterval(updateClock, 1000);
+    updateClock();
+
+    // Generate session ID
+    sessionIdEl.textContent = 'sess_' + Date.now().toString(36) + Math.random().toString(36).substr(2, 8);
+
+    // Fetch IP (simulated)
+    clientIpEl.textContent = '192.168.' + Math.floor(Math.random() * 255) + '.' + Math.floor(Math.random() * 255);
+
+    // Input validation feedback
+    codeInput.addEventListener('input', () => {
+      const status = document.getElementById('code-status');
+      status.classList.add('visible');
+      if (codeInput.value.length > 5) {
+        status.className = 'input-status visible valid';
+        status.innerHTML = '<i class="fas fa-check"></i>';
+      } else {
+        status.className = 'input-status visible';
+        status.innerHTML = '<i class="fas fa-clock"></i>';
+      }
+    });
+
+    passwordInput.addEventListener('input', () => {
+      const status = document.getElementById('password-status');
+      status.classList.add('visible');
+      if (passwordInput.value.length > 0) {
+        status.className = 'input-status visible valid';
+        status.innerHTML = '<i class="fas fa-check"></i>';
+      } else {
+        status.className = 'input-status visible';
+        status.innerHTML = '<i class="fas fa-clock"></i>';
+      }
+    });
+
+    // Check if already authenticated as admin
+    onAuthStateChanged(auth, async (user) => {
+      if (user) {
+        // Check if this user has admin role
+        try {
+          const q = query(collection(db, 'users'), where('uid', '==', user.uid));
+          const snap = await getDocs(q);
+          if (!snap.empty) {
+            const userData = snap.docs[0].data();
+            if (userData.role === 'admin' || userData.userType === 'admin') {
+              // Already authenticated as admin — redirect to dashboard
+              window.location.href = '/dashboard-app/';
+            }
+          }
+        } catch (e) {
+          console.warn('Admin check failed:', e);
+        }
+      }
+    });
+
+    // Check if admin exists in Firebase, if not create
+    async function ensureAdminExists() {
+      try {
+        const q = query(collection(db, 'users'), where('email', '==', ADMIN_DEFAULTS.email));
+        const snap = await getDocs(q);
+        if (snap.empty) {
+          // Create admin user
+          const adminResult = await signInWithEmailAndPassword(auth, ADMIN_DEFAULTS.email, ADMIN_DEFAULTS.password).catch(async () => {
+            // Try to create
+            const { createUserWithEmailAndPassword, updateProfile } = await import('https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js');
+            const res = await createUserWithEmailAndPassword(auth, ADMIN_DEFAULTS.email, ADMIN_DEFAULTS.password);
+            await updateProfile(res.user, { displayName: ADMIN_DEFAULTS.name });
+            await addDoc(collection(db, 'users'), {
+              uid: res.user.uid,
+              email: ADMIN_DEFAULTS.email,
+              username: 'hexadmin',
+              fullName: ADMIN_DEFAULTS.name,
+              userType: 'admin',
+              role: 'admin',
+              provider: 'email',
+              createdAt: new Date().toISOString()
+            });
+            return;
+          });
+        }
+      } catch (e) {
+        if (e.code !== 'auth/email-already-in-use' && e.code !== 'auth/user-not-found') {
+          console.warn('Admin setup:', e.message);
+        }
+      }
+    }
+
+    // Form submission
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      errorMsg.classList.remove('visible');
+
+      const code = codeInput.value.trim();
+      const password = passwordInput.value.trim();
+
+      // Validate admin code
+      if (code !== ADMIN_DEFAULTS.code) {
+        errorText.textContent = 'INVALID ADMIN ACCESS CODE — ACCESS DENIED';
+        errorMsg.classList.add('visible');
+        codeInput.value = '';
+        passwordInput.value = '';
+        return;
+      }
+
+      if (!password) {
+        errorText.textContent = 'PASSWORD FIELD CANNOT BE EMPTY';
+        errorMsg.classList.add('visible');
+        return;
+      }
+
+      // Show loading
+      submitBtn.classList.add('loading');
+      submitBtn.disabled = true;
+
+      try {
+        // Try to sign in as admin
+        await ensureAdminExists();
+        const result = await signInWithEmailAndPassword(auth, ADMIN_DEFAULTS.email, password);
+        
+        // Success — redirect to dashboard
+        submitBtn.innerHTML = '<i class="fas fa-check"></i> AUTHENTICATED — REDIRECTING...';
+        setTimeout(() => {
+          window.location.href = '/dashboard-app/';
+        }, 800);
+      } catch (err) {
+        submitBtn.classList.remove('loading');
+        submitBtn.disabled = false;
+        
+        if (err.code === 'auth/wrong-password' || err.code === 'auth/invalid-credential') {
+          errorText.textContent = 'INVALID PASSWORD — ACCESS DENIED';
+        } else if (err.code === 'auth/user-not-found') {
+          errorText.textContent = 'ADMIN ACCOUNT NOT FOUND — CONTACT SYSTEM ADMINISTRATOR';
+        } else {
+          errorText.textContent = 'AUTHENTICATION ERROR: ' + (err.message || err.code).toUpperCase();
+        }
+        errorMsg.classList.add('visible');
+        passwordInput.value = '';
+      }
+    });
+
+    // Handle Enter key
+    form.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') form.dispatchEvent(new Event('submit'));
+    });
+
+    // Focus code input on load
+    setTimeout(() => codeInput.focus(), 300);
+  </script>
+</body>
+</html>

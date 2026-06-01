@@ -581,7 +581,20 @@
   <div id="toast-container" class="toast-container"></div>
 
   <script type="module">
-    import { registerUser, handleOAuthLogin, validateEmail, validatePassword, validateUsername } from './src/auth.js';
+    import { registerUserFirebase, validateEmail } from './src/firebase.js';
+    import { 
+      createUserWithEmailAndPassword, 
+      updateProfile,
+      getAuth 
+    } from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js';
+    import {
+      getFirestore,
+      collection,
+      addDoc,
+      query,
+      where,
+      getDocs
+    } from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js';
 
     // Toggle password visibility
     document.querySelectorAll('.toggle-password').forEach(btn => {
@@ -612,8 +625,13 @@
     // Password strength indicator
     document.getElementById('password').addEventListener('input', (e) => {
       const password = e.target.value;
-      const validation = validatePassword(password);
-      const checks = validation.checks;
+      const checks = {
+        minLength: password.length >= 8,
+        uppercase: /[A-Z]/.test(password),
+        lowercase: /[a-z]/.test(password),
+        number: /\d/.test(password),
+        specialChar: /[!@#$%^&*(),.?":{}|<>]/.test(password)
+      };
       
       let score = 0;
       if (checks.minLength) score++;
@@ -647,6 +665,19 @@
         }
       });
     });
+
+    // Validation helpers
+    function validateUsername(username) {
+      return username.length >= 3 && /^[a-zA-Z0-9_]+$/.test(username);
+    }
+
+    function validatePassword(password) {
+      const hasMinLength = password.length >= 8;
+      const hasUppercase = /[A-Z]/.test(password);
+      const hasLowercase = /[a-z]/.test(password);
+      const hasNumber = /\d/.test(password);
+      return { valid: hasMinLength && hasUppercase && hasLowercase && hasNumber };
+    }
 
     // Show error
     function showError(fieldId, errorId, message) {
@@ -694,8 +725,8 @@
       }, 4000);
     }
 
-    // Form submission
-    document.getElementById('register-form').addEventListener('submit', (e) => {
+    // Form submission — real Firebase Auth
+    document.getElementById('register-form').addEventListener('submit', async (e) => {
       e.preventDefault();
       clearErrors();
 
@@ -726,7 +757,7 @@
 
       const passwordValidation = validatePassword(password);
       if (!passwordValidation.valid) {
-        showError('password', 'password-error', 'Password does not meet requirements');
+        showError('password', 'password-error', 'Password must be 8+ chars with uppercase, lowercase and number');
         hasError = true;
       }
 
@@ -742,32 +773,77 @@
 
       if (hasError) return;
 
-      const result = registerUser({ username, fullName: fullname, email, password, userType });
+      // Show loading
+      const submitBtn = e.target.querySelector('.auth-submit-btn');
+      submitBtn.disabled = true;
+      submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Creating account...';
 
-      if (result.success) {
-        showToast(`Welcome to HexStore, ${result.user.username}!`, 'success');
+      try {
+        // Register via Firebase
+        const auth = getAuth();
+        const db = getFirestore();
+        
+        const result = await createUserWithEmailAndPassword(auth, email, password);
+        const user = result.user;
+
+        // Update display name
+        await updateProfile(user, { displayName: fullname || username });
+
+        // Check if email already in Firestore
+        const q = query(collection(db, 'users'), where('email', '==', email));
+        const snap = await getDocs(q);
+        
+        if (snap.empty) {
+          // Create user document in Firestore
+          await addDoc(collection(db, 'users'), {
+            uid: user.uid,
+            email: email,
+            username: username,
+            fullName: fullname,
+            userType: userType,
+            role: userType,
+            provider: 'email',
+            createdAt: new Date().toISOString(),
+            avatar: null,
+            phone: '',
+            verified: false,
+            settings: {
+              notifications: true,
+              newsletter: false,
+              twoFactor: false
+            }
+          });
+        }
+
+        showToast(`Welcome to HexStore, ${fullname || username}!`, 'success');
         setTimeout(() => {
-          window.location.href = 'index.html';
+          // Redirect based on role
+          if (userType === 'seller') {
+            window.location.href = '/dashboard-app/?role=seller';
+          } else {
+            window.location.href = '/dashboard-app/?role=buyer';
+          }
         }, 1500);
-      } else {
-        showToast(result.error, 'error');
+      } catch (err) {
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = '<i class="fas fa-user-plus"></i> Create My Account';
+        
+        if (err.code === 'auth/email-already-in-use') {
+          showError('email', 'email-error', 'An account with this email already exists');
+        } else if (err.code === 'auth/weak-password') {
+          showError('password', 'password-error', 'Password is too weak. Use 8+ characters.');
+        } else if (err.code === 'auth/invalid-email') {
+          showError('email', 'email-error', 'Invalid email format');
+        } else {
+          showToast(err.message || 'Registration failed. Please try again.', 'error');
+        }
       }
     });
 
     // OAuth buttons
     document.querySelectorAll('.oauth-btn').forEach(btn => {
       btn.addEventListener('click', () => {
-        const provider = btn.dataset.provider;
-        const result = handleOAuthLogin(provider);
-
-        if (result.success) {
-          showToast(`Welcome, ${result.user.username}!`, 'success');
-          setTimeout(() => {
-            window.location.href = 'index.html';
-          }, 1500);
-        } else {
-          showToast(result.error, 'error');
-        }
+        showToast('OAuth sign-in coming soon. Use email/password.', 'info');
       });
     });
   </script>

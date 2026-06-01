@@ -340,8 +340,8 @@
   <div id="toast-container" class="toast-container"></div>
 
   <script type="module">
-    // Import auth module
-    import { loginUser, handleOAuthLogin, validateEmail } from './src/auth.js';
+    import { signInUser, getUserDoc, onFirebaseAuthChange, seedDefaultUser, auth } from './src/firebase.js';
+    import { signInWithEmailAndPassword } from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js';
 
     // Toggle password visibility
     document.querySelectorAll('.toggle-password').forEach(btn => {
@@ -405,8 +405,17 @@
       }, 4000);
     }
 
-    // Form submission
-    document.getElementById('login-form').addEventListener('submit', (e) => {
+    // Confirm email validation
+    function validateEmail(email) {
+      const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      return re.test(email);
+    }
+
+    // Seed default users (John Doe + Admin) on first visit
+    seedDefaultUser().catch(() => {});
+
+    // Form submission — real Firebase Auth
+    document.getElementById('login-form').addEventListener('submit', async (e) => {
       e.preventDefault();
       clearErrors();
 
@@ -426,32 +435,55 @@
 
       if (hasError) return;
 
-      const result = loginUser(email, password);
+      // Show loading state
+      const submitBtn = e.target.querySelector('.auth-submit-btn');
+      submitBtn.disabled = true;
+      submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Signing in...';
 
-      if (result.success) {
-        showToast(`Welcome back, ${result.user.username}!`, 'success');
+      try {
+        // Authenticate via Firebase
+        const userCredential = await signInWithEmailAndPassword(auth, email, password);
+        const user = userCredential.user;
+        
+        // Get user document from Firestore to determine role
+        const userDoc = await getUserDoc(user.uid);
+        
+        showToast(`Welcome back, ${userDoc?.fullName || user.displayName || 'User'}!`, 'success');
+        
+        // Redirect based on user role
         setTimeout(() => {
-          window.location.href = 'index.html';
+          const role = userDoc?.userType || userDoc?.role || 'buyer';
+          
+          if (role === 'admin') {
+            window.location.href = '/dashboard-app/';
+          } else if (role === 'seller') {
+            window.location.href = '/dashboard-app/?role=seller';
+          } else {
+            window.location.href = '/dashboard-app/?role=buyer';
+          }
         }, 1500);
-      } else {
-        showError('password', 'password-error', result.error);
+      } catch (err) {
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = '<i class="fas fa-sign-in-alt"></i> Sign In';
+        
+        if (err.code === 'auth/user-not-found') {
+          showError('email', 'email-error', 'No account found with this email');
+        } else if (err.code === 'auth/wrong-password' || err.code === 'auth/invalid-credential') {
+          showError('password', 'password-error', 'Incorrect password');
+        } else if (err.code === 'auth/invalid-email') {
+          showError('email', 'email-error', 'Invalid email format');
+        } else if (err.code === 'auth/too-many-requests') {
+          showError('password', 'password-error', 'Too many attempts. Try again later.');
+        } else {
+          showError('password', 'password-error', err.message || 'Authentication failed');
+        }
       }
     });
 
     // OAuth buttons
     document.querySelectorAll('.oauth-btn').forEach(btn => {
       btn.addEventListener('click', () => {
-        const provider = btn.dataset.provider;
-        const result = handleOAuthLogin(provider);
-
-        if (result.success) {
-          showToast(`Welcome, ${result.user.username}!`, 'success');
-          setTimeout(() => {
-            window.location.href = 'index.html';
-          }, 1500);
-        } else {
-          showToast(result.error, 'error');
-        }
+        showToast('OAuth sign-in coming soon. Use email/password.', 'info');
       });
     });
   </script>
