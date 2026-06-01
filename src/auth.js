@@ -894,8 +894,26 @@ function clearFormErrors(formType) {
 }
 
 // ====================================
-// EXPORT API
+// EXPORT API (ES Module)
 // ====================================
+export {
+  registerUser as register,
+  loginUser as login,
+  logoutUser as logout,
+  isLoggedIn,
+  getCurrentUser,
+  isSeller,
+  isBuyer,
+  openAuthModal,
+  closeAuthModal,
+  handleOAuthLogin,
+  validateEmail,
+  validatePassword,
+  validateUsername,
+  showToast
+};
+
+// Also expose globally for backward compatibility
 window.HexAuth = {
   init: () => {
     updateUIForAuthState();

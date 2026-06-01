@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>HexStore - Modern E-commerce Marketplace</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  <link rel="stylesheet" href="/public/style.css">
+  <link rel="stylesheet" href="/style.css">
 </head>
 <body>
   <div id="app">
@@ -24,14 +24,14 @@
         <div class="hs-actions">
           <!-- Auth Buttons (shown when logged out) -->
           <div id="auth-buttons" class="auth-buttons-group">
-            <button id="signin-btn" class="action-btn btn-outline" title="Sign In">
+            <a href="login.html" class="action-btn btn-outline" title="Sign In">
               <i class="fas fa-sign-in-alt"></i>
               <span>Sign In</span>
-            </button>
-            <button id="register-btn" class="action-btn btn-primary-action" title="Register">
+            </a>
+            <a href="register.html" class="action-btn btn-primary-action" title="Register">
               <i class="fas fa-user-plus"></i>
               <span>Register</span>
-            </button>
+            </a>
           </div>
           
           <!-- User Menu (shown when logged in) -->
@@ -87,28 +87,32 @@
     <section class="hero-carousel">
       <div class="carousel-container">
         <div class="carousel-slides" id="carousel-slides">
-          <div class="carousel-slide" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+          <div class="carousel-slide">
+            <img class="carousel-bg" src="https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=3840&h=2160&fit=crop&q=80" alt="Summer Collection">
             <div class="carousel-content">
               <h1>Summer Collection 2026</h1>
               <p>Discover the latest trends at unbeatable prices</p>
               <button class="cta-btn">Shop Now</button>
             </div>
           </div>
-          <div class="carousel-slide" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);">
+          <div class="carousel-slide">
+            <img class="carousel-bg" src="https://images.unsplash.com/photo-1587829191301-ad8f47e4b295?w=3840&h=2160&fit=crop&q=80" alt="Exclusive Deals">
             <div class="carousel-content">
               <h1>Exclusive Deals Today</h1>
               <p>Up to 70% off on selected items</p>
               <button class="cta-btn">View Deals</button>
             </div>
           </div>
-          <div class="carousel-slide" style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);">
+          <div class="carousel-slide">
+            <img class="carousel-bg" src="https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=3840&h=2160&fit=crop&q=80" alt="Free Shipping">
             <div class="carousel-content">
               <h1>Free Shipping Worldwide</h1>
               <p>On orders over $50. No hidden charges!</p>
               <button class="cta-btn">Start Shopping</button>
             </div>
           </div>
-          <div class="carousel-slide" style="background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);">
+          <div class="carousel-slide">
+            <img class="carousel-bg" src="https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=3840&h=2160&fit=crop&q=80" alt="New Arrivals">
             <div class="carousel-content">
               <h1>New Arrivals</h1>
               <p>Fresh products added every week</p>

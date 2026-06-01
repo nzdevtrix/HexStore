@@ -1,0 +1,49 @@
+<div class="app-header">
+  <div class="container">
+    <h1>{{title}}</h1>
+  </div>
+</div>
+<div class="container">
+  <div class="metrics">
+    <div class="metric">
+      <h3>Total Accounts</h3>
+      <div style="font-size:28px;font-weight:700">{{metrics.users}}</div>
+    </div>
+    <div class="metric">
+      <h3>Sellers</h3>
+      <div style="font-size:28px;font-weight:700">{{metrics.sellers}}</div>
+    </div>
+    <div class="metric">
+      <h3>Buyers</h3>
+      <div style="font-size:28px;font-weight:700">{{metrics.buyers}}</div>
+    </div>
+  </div>
+
+  <div class="table">
+    <h3>Accounts</h3>
+    <table width="100%">
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Email</th>
+          <th>Role</th>
+          <th>Phone</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let u of users">
+          <td>{{u.name}}</td>
+          <td>{{u.email}}</td>
+          <td>{{u.role}}</td>
+          <td>{{u.phone}}</td>
+        </tr>
+        <tr *ngIf="users.length===0">
+          <td colspan="4" style="text-align:center;color:#64748b">No accounts (Firebase not configured or empty)</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Account editor / login -->
+  <app-account></app-account>
+</div>

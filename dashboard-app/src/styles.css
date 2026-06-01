@@ -1,0 +1,8 @@
+/* Global styles for HexStore Dashboard */
+:root{--primary:#0f6fff;--bg:#f7fafc;--card:#fff}
+body{font-family:Inter,Segoe UI,Roboto,Arial,sans-serif;background:var(--bg);margin:0;color:#0f172a}
+.app-header{background:linear-gradient(90deg,var(--primary),#667eea);color:white;padding:12px 20px}
+.container{max-width:1200px;margin:20px auto;padding:0 16px}
+.metrics{display:flex;gap:16px}
+.metric{background:var(--card);padding:16px;border-radius:8px;box-shadow:0 6px 18px rgba(15,31,56,0.06);flex:1}
+.table{background:var(--card);padding:12px;border-radius:8px;margin-top:16px}

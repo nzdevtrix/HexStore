@@ -1,0 +1,38 @@
+<div class="table" style="margin-top:18px">
+  <h3>Account</h3>
+
+  <div *ngIf="!loggedInUser">
+    <div style="display:flex;gap:12px;align-items:center;">
+      <button (click)="mode='login'" [disabled]="mode==='login'" class="btn">Login</button>
+      <button (click)="mode='register'" [disabled]="mode==='register'" class="btn">Register</button>
+    </div>
+    <form (ngSubmit)="submit()" style="margin-top:12px;display:flex;flex-direction:column;gap:8px;max-width:420px">
+      <input placeholder="Email" [(ngModel)]="email" name="email" required />
+      <input placeholder="Password" [(ngModel)]="password" name="password" type="password" required />
+      <input *ngIf="mode==='register'" placeholder="Full name" [(ngModel)]="name" name="name" />
+      <input *ngIf="mode==='register'" placeholder="Phone" [(ngModel)]="phone" name="phone" />
+      <button class="btn btn-primary" type="submit">{{ mode==='login' ? 'Sign In' : 'Create Account' }}</button>
+    </form>
+  </div>
+
+  <div *ngIf="loggedInUser">
+    <div style="display:flex;justify-content:space-between;align-items:center">
+      <div>
+        <strong>{{ loggedInUser.displayName || loggedInUser.email }}</strong>
+        <div style="color:#64748b">UID: {{ loggedInUser.uid }}</div>
+      </div>
+      <div>
+        <button class="btn" (click)="signOut()">Sign out</button>
+      </div>
+    </div>
+
+    <form style="margin-top:12px;display:flex;flex-direction:column;gap:8px;max-width:420px">
+      <input placeholder="Full name" [(ngModel)]="name" name="name2" />
+      <input placeholder="Phone" [(ngModel)]="phone" name="phone2" />
+      <div style="display:flex;gap:8px">
+        <button class="btn btn-primary" (click)="saveProfile()" type="button">Save</button>
+        <button class="btn" (click)="changePassword()" type="button">Change Password</button>
+      </div>
+    </form>
+  </div>
+</div>

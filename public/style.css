@@ -221,11 +221,13 @@ body {
   border: 2px solid var(--primary);
   color: var(--primary);
   font-weight: 600;
+  text-decoration: none;
 }
 
 .btn-outline:hover {
   background: var(--primary);
   color: white;
+  text-decoration: none;
 }
 
 /* Register Button - Primary Style */
@@ -234,6 +236,7 @@ body {
   color: white;
   border: none;
   font-weight: 600;
+  text-decoration: none;
 }
 
 .btn-primary-action:hover {
@@ -241,6 +244,7 @@ body {
   color: white;
   border-color: transparent;
   box-shadow: 0 4px 15px rgba(15, 111, 255, 0.4);
+  text-decoration: none;
 }
 
 /* User Menu Group */
@@ -420,6 +424,18 @@ body {
   justify-content: center;
   position: relative;
   overflow: hidden;
+}
+
+.carousel-slide img.carousel-bg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  z-index: 1;
+  transform-origin: center center;
+  transition: transform 12s linear;
+  filter: brightness(0.78) saturate(1.05);
 }
 
 .carousel-slide::before {
