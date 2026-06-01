@@ -2,70 +2,310 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <link rel="icon" type="image/svg+xml" href="/webstorm-icon-logo.svg" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>HexStore - Modern E-commerce platform</title>
+  <title>HexStore - Modern E-commerce Marketplace</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <link rel="stylesheet" href="/public/style.css">
 </head>
 <body>
-  </head>
-<body>
   <div id="app">
+    <!-- HEADER -->
     <header class="hs-header">
       <div class="hs-top">
-        <div class="hs-brand">HexStore</div>
-        <div class="hs-search">
-          <input id="search-input" placeholder="Search products, brands and more" />
+        <div class="hs-logo">
+          <i class="fas fa-cube"></i>
+          <span>HexStore</span>
+        </div>
+        <div class="hs-search-wrapper">
+          <i class="fas fa-search"></i>
+          <input id="search-input" type="text" placeholder="Search products, brands and more...">
+          <div id="search-suggestions" class="search-suggestions"></div>
         </div>
         <div class="hs-actions">
-          <button id="account-btn">Account</button>
-          <button id="cart-btn">Cart (<span id="cart-count">0</span>)</button>
+          <button id="account-btn" class="action-btn" title="Account">
+            <i class="fas fa-user"></i>
+            <span>Account</span>
+          </button>
+          <button id="cart-btn" class="action-btn" title="Cart">
+            <i class="fas fa-shopping-cart"></i>
+            <span>Cart</span>
+            <span id="cart-badge" class="cart-badge">0</span>
+          </button>
+          <button id="favorites-btn" class="action-btn" title="Favorites">
+            <i class="fas fa-heart"></i>
+            <span>Wishlist</span>
+          </button>
         </div>
       </div>
       <nav class="hs-nav">
-        <a href="#">All</a>
-        <a href="#">Electronics</a>
-        <a href="#">Home</a>
-        <a href="#">Toys</a>
-        <a href="#">Books</a>
+        <button class="nav-btn active" data-category="all">
+          <i class="fas fa-home"></i> All Products
+        </button>
+        <button class="nav-btn" data-category="electronics">
+          <i class="fas fa-microchip"></i> Electronics
+        </button>
+        <button class="nav-btn" data-category="accessories">
+          <i class="fas fa-headphones"></i> Accessories
+        </button>
+        <button class="nav-btn" data-category="home">
+          <i class="fas fa-couch"></i> Home & Garden
+        </button>
+        <button class="nav-btn" data-category="fashion">
+          <i class="fas fa-shirt"></i> Fashion
+        </button>
+        <button class="nav-btn" data-category="toys">
+          <i class="fas fa-gamepad"></i> Toys & Games
+        </button>
+        <button class="nav-btn" data-category="books">
+          <i class="fas fa-book"></i> Books
+        </button>
+        <button class="nav-btn" data-category="sports">
+          <i class="fas fa-dumbbell"></i> Sports
+        </button>
       </nav>
     </header>
 
+    <!-- HERO CAROUSEL -->
+    <section class="hero-carousel">
+      <div class="carousel-container">
+        <div class="carousel-slides" id="carousel-slides">
+          <div class="carousel-slide" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+            <div class="carousel-content">
+              <h1>Summer Collection 2026</h1>
+              <p>Discover the latest trends at unbeatable prices</p>
+              <button class="cta-btn">Shop Now</button>
+            </div>
+          </div>
+          <div class="carousel-slide" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);">
+            <div class="carousel-content">
+              <h1>Exclusive Deals Today</h1>
+              <p>Up to 70% off on selected items</p>
+              <button class="cta-btn">View Deals</button>
+            </div>
+          </div>
+          <div class="carousel-slide" style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);">
+            <div class="carousel-content">
+              <h1>Free Shipping Worldwide</h1>
+              <p>On orders over $50. No hidden charges!</p>
+              <button class="cta-btn">Start Shopping</button>
+            </div>
+          </div>
+          <div class="carousel-slide" style="background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);">
+            <div class="carousel-content">
+              <h1>New Arrivals</h1>
+              <p>Fresh products added every week</p>
+              <button class="cta-btn">Explore</button>
+            </div>
+          </div>
+        </div>
+        <button class="carousel-control prev" id="carousel-prev">
+          <i class="fas fa-chevron-left"></i>
+        </button>
+        <button class="carousel-control next" id="carousel-next">
+          <i class="fas fa-chevron-right"></i>
+        </button>
+        <div class="carousel-indicators" id="carousel-indicators"></div>
+      </div>
+    </section>
+
+    <!-- FEATURED PRODUCTS SECTION -->
+    <section class="featured-section">
+      <div class="section-header">
+        <h2><i class="fas fa-star"></i> Featured Products</h2>
+        <p>Hand-picked items just for you</p>
+      </div>
+      <div class="featured-carousel" id="featured-carousel">
+        <!-- Populated by JS -->
+      </div>
+    </section>
+
+    <!-- MAIN CONTENT -->
     <main class="hs-main">
+      <!-- FILTERS SIDEBAR -->
       <aside class="hs-filters">
-        <h3>Filters</h3>
-        <label><input type="checkbox" value="prime" id="filter-prime"> Prime</label>
-        <label><input type="checkbox" value="inStock" id="filter-instock"> In Stock</label>
+        <div class="filter-header">
+          <h3><i class="fas fa-sliders-h"></i> Filters</h3>
+          <button id="clear-filters" class="clear-btn">Clear All</button>
+        </div>
+
+        <div class="filter-group">
+          <h4>Price Range</h4>
+          <input type="range" id="filter-price" min="0" max="1000" value="1000" class="price-slider">
+          <div class="price-display">
+            <span>$0</span> - <span id="price-value">$1000</span>
+          </div>
+        </div>
+
+        <div class="filter-group">
+          <h4>Categories</h4>
+          <label class="filter-label">
+            <input type="checkbox" value="all" class="category-filter" checked>
+            <span>All Categories</span>
+          </label>
+          <label class="filter-label">
+            <input type="checkbox" value="electronics" class="category-filter">
+            <span>Electronics</span>
+          </label>
+          <label class="filter-label">
+            <input type="checkbox" value="accessories" class="category-filter">
+            <span>Accessories</span>
+          </label>
+          <label class="filter-label">
+            <input type="checkbox" value="home" class="category-filter">
+            <span>Home & Garden</span>
+          </label>
+          <label class="filter-label">
+            <input type="checkbox" value="fashion" class="category-filter">
+            <span>Fashion</span>
+          </label>
+          <label class="filter-label">
+            <input type="checkbox" value="toys" class="category-filter">
+            <span>Toys & Games</span>
+          </label>
+          <label class="filter-label">
+            <input type="checkbox" value="books" class="category-filter">
+            <span>Books</span>
+          </label>
+          <label class="filter-label">
+            <input type="checkbox" value="sports" class="category-filter">
+            <span>Sports</span>
+          </label>
+        </div>
+
+        <div class="filter-group">
+          <h4>Special</h4>
+          <label class="filter-label">
+            <input type="checkbox" id="filter-prime">
+            <i class="fas fa-flash"></i>
+            <span>HexStore Prime</span>
+          </label>
+          <label class="filter-label">
+            <input type="checkbox" id="filter-instock">
+            <i class="fas fa-check"></i>
+            <span>In Stock</span>
+          </label>
+          <label class="filter-label">
+            <input type="checkbox" id="filter-deals">
+            <i class="fas fa-tag"></i>
+            <span>Deals</span>
+          </label>
+        </div>
+
+        <div class="filter-group">
+          <h4>Rating</h4>
+          <label class="filter-label">
+            <input type="radio" name="rating" value="5">
+            <span>★★★★★ 5 Star</span>
+          </label>
+          <label class="filter-label">
+            <input type="radio" name="rating" value="4">
+            <span>★★★★☆ 4+ Star</span>
+          </label>
+          <label class="filter-label">
+            <input type="radio" name="rating" value="3">
+            <span>★★★☆☆ 3+ Star</span>
+          </label>
+        </div>
       </aside>
 
+      <!-- PRODUCTS SECTION -->
       <section class="hs-products">
         <div class="hs-tools">
-          <div id="results-info">Showing <span id="results-count">0</span> results</div>
+          <div id="results-info" class="results-info">
+            <span><i class="fas fa-box"></i> Showing <span id="results-count">0</span> products</span>
+          </div>
           <div class="hs-sort">
-            <label>Sort:</label>
-            <select id="sort-select">
+            <label><i class="fas fa-sort"></i> Sort by:</label>
+            <select id="sort-select" class="sort-select">
               <option value="relevance">Relevance</option>
+              <option value="newest">Newest</option>
               <option value="price-asc">Price: Low to High</option>
               <option value="price-desc">Price: High to Low</option>
+              <option value="rating">Top Rated</option>
+              <option value="popular">Most Popular</option>
             </select>
           </div>
         </div>
-        <div id="products-grid" class="products-grid"></div>
+        <div id="products-grid" class="products-grid">
+          <!-- Populated by JS -->
+        </div>
       </section>
     </main>
 
+    <!-- CART DRAWER -->
     <div id="cart-drawer" class="cart-drawer hidden">
-      <h3>Your Cart</h3>
-      <div id="cart-items"></div>
+      <div class="cart-header">
+        <h3><i class="fas fa-shopping-cart"></i> Shopping Cart</h3>
+        <button id="close-cart" class="close-btn">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+      <div id="cart-items" class="cart-items">
+        <!-- Populated by JS -->
+      </div>
+      <div class="cart-empty">
+        <i class="fas fa-inbox"></i>
+        <p>Your cart is empty</p>
+      </div>
       <div class="cart-footer">
-        <div>Total: $<span id="cart-total">0.00</span></div>
-        <button id="checkout-btn">Checkout</button>
+        <div class="cart-summary">
+          <div><span>Subtotal:</span> <span id="cart-subtotal">$0.00</span></div>
+          <div><span>Shipping:</span> <span id="cart-shipping">$0.00</span></div>
+          <div class="cart-total"><span>Total:</span> <span id="cart-total">$0.00</span></div>
+        </div>
+        <button id="checkout-btn" class="checkout-btn">
+          <i class="fas fa-lock"></i> Proceed to Checkout
+        </button>
       </div>
     </div>
+
+    <!-- CART OVERLAY -->
+    <div id="cart-overlay" class="cart-overlay hidden"></div>
+
+    <!-- FOOTER -->
+    <footer class="footer">
+      <div class="footer-content">
+        <div class="footer-section">
+          <h4><i class="fas fa-cube"></i> HexStore</h4>
+          <p>Your trusted marketplace for quality products at best prices.</p>
+          <div class="social-icons">
+            <a href="#" title="Facebook"><i class="fab fa-facebook"></i></a>
+            <a href="#" title="Twitter"><i class="fab fa-twitter"></i></a>
+            <a href="#" title="Instagram"><i class="fab fa-instagram"></i></a>
+            <a href="#" title="LinkedIn"><i class="fab fa-linkedin"></i></a>
+          </div>
+        </div>
+        <div class="footer-section">
+          <h4>Quick Links</h4>
+          <a href="#">About Us</a>
+          <a href="#">Contact</a>
+          <a href="#">Blog</a>
+          <a href="#">Careers</a>
+        </div>
+        <div class="footer-section">
+          <h4>Support</h4>
+          <a href="#">Help Center</a>
+          <a href="#">Shipping Info</a>
+          <a href="#">Returns</a>
+          <a href="#">FAQ</a>
+        </div>
+        <div class="footer-section">
+          <h4>Legal</h4>
+          <a href="#">Privacy Policy</a>
+          <a href="#">Terms & Conditions</a>
+          <a href="#">Cookie Policy</a>
+          <a href="#">Disclaimer</a>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <p>&copy; 2026 HexStore. All rights reserved. | Powered by Modern Technology</p>
+      </div>
+    </footer>
+
+    <!-- TOAST NOTIFICATIONS -->
+    <div id="toast-container" class="toast-container"></div>
   </div>
 
   <script type="module" src="/src/main.js"></script>
-</body>
-</html>
 </body>
 </html>
