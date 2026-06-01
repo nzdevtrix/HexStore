@@ -22,10 +22,27 @@
           <div id="search-suggestions" class="search-suggestions"></div>
         </div>
         <div class="hs-actions">
-          <button id="account-btn" class="action-btn" title="Account">
-            <i class="fas fa-user"></i>
-            <span>Account</span>
-          </button>
+          <!-- Auth Buttons (shown when logged out) -->
+          <div id="auth-buttons" class="auth-buttons-group">
+            <button id="signin-btn" class="action-btn btn-outline" title="Sign In">
+              <i class="fas fa-sign-in-alt"></i>
+              <span>Sign In</span>
+            </button>
+            <button id="register-btn" class="action-btn btn-primary-action" title="Register">
+              <i class="fas fa-user-plus"></i>
+              <span>Register</span>
+            </button>
+          </div>
+          
+          <!-- User Menu (shown when logged in) -->
+          <div id="user-menu-group" class="user-menu-group hidden">
+            <button id="account-btn" class="action-btn user-btn" title="Account">
+              <img id="user-avatar" src="" alt="User" class="user-avatar">
+              <span id="user-name">User</span>
+              <i class="fas fa-chevron-down dropdown-arrow"></i>
+            </button>
+          </div>
+          
           <button id="cart-btn" class="action-btn" title="Cart">
             <i class="fas fa-shopping-cart"></i>
             <span>Cart</span>
@@ -34,6 +51,7 @@
           <button id="favorites-btn" class="action-btn" title="Favorites">
             <i class="fas fa-heart"></i>
             <span>Wishlist</span>
+            <span id="wishlist-badge" class="wishlist-badge">0</span>
           </button>
         </div>
       </div>
