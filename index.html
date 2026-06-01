@@ -5,36 +5,67 @@
   <link rel="icon" type="image/svg+xml" href="/webstorm-icon-logo.svg" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>HexStore - Modern E-commerce platform</title>
-  <link rel="stylesheet" href="/style.css">
+  <link rel="stylesheet" href="/public/style.css">
 </head>
 <body>
-<header class="logo">
-  <nav>
-    <logo class="pageTitle">HexStore</logo>
-    <p class="subtitle_page_indexHTML">Modern. Dynamic. Marketplace</p>
-  </nav>
-</header>
-<main id="app">
-  <h1 class="title">
-    Thank you for trying it out. <br /> Your first project is up and running
-    now.
-  </h1>
-  <section class="counter">
-    <div class="counter-info">
-      <p class="counter-text">Counter is</p>
-      <p class="counter-value" id="counter-value"></p>
+  </head>
+<body>
+  <div id="app">
+    <header class="hs-header">
+      <div class="hs-top">
+        <div class="hs-brand">HexStore</div>
+        <div class="hs-search">
+          <input id="search-input" placeholder="Search products, brands and more" />
+        </div>
+        <div class="hs-actions">
+          <button id="account-btn">Account</button>
+          <button id="cart-btn">Cart (<span id="cart-count">0</span>)</button>
+        </div>
+      </div>
+      <nav class="hs-nav">
+        <a href="#">All</a>
+        <a href="#">Electronics</a>
+        <a href="#">Home</a>
+        <a href="#">Toys</a>
+        <a href="#">Books</a>
+      </nav>
+    </header>
+
+    <main class="hs-main">
+      <aside class="hs-filters">
+        <h3>Filters</h3>
+        <label><input type="checkbox" value="prime" id="filter-prime"> Prime</label>
+        <label><input type="checkbox" value="inStock" id="filter-instock"> In Stock</label>
+      </aside>
+
+      <section class="hs-products">
+        <div class="hs-tools">
+          <div id="results-info">Showing <span id="results-count">0</span> results</div>
+          <div class="hs-sort">
+            <label>Sort:</label>
+            <select id="sort-select">
+              <option value="relevance">Relevance</option>
+              <option value="price-asc">Price: Low to High</option>
+              <option value="price-desc">Price: High to Low</option>
+            </select>
+          </div>
+        </div>
+        <div id="products-grid" class="products-grid"></div>
+      </section>
+    </main>
+
+    <div id="cart-drawer" class="cart-drawer hidden">
+      <h3>Your Cart</h3>
+      <div id="cart-items"></div>
+      <div class="cart-footer">
+        <div>Total: $<span id="cart-total">0.00</span></div>
+        <button id="checkout-btn">Checkout</button>
+      </div>
     </div>
-    <div class="counter-interaction">
-      <button id="increaseByOne" type="button">+1</button>
-      <button id="increaseByTwo" type="button">+2</button>
-      <button id="decreaseByOne" type="button">-1</button>
-      <button id="decreaseByTwo" type="button">-2</button>
-    </div>
-  </section>
-</main>
-<footer class="technologies">
-  <img src="/technologies.svg" alt="List of supported technologies">
-</footer>
-<script type="module" src="/src/main.js"></script>
+  </div>
+
+  <script type="module" src="/src/main.js"></script>
+</body>
+</html>
 </body>
 </html>
