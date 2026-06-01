@@ -1,187 +1,49 @@
-@font-face {
-    font-family: "JetBrains Sans";
-    src: url("fonts/JetBrainsSans-Regular.woff2");
+:root{
+  --bg:#ffffff;
+  --muted:#6b7280;
+  --primary:#0f6fff;
+  --card:#ffffff;
+  --shadow: 0 6px 18px rgba(15,31,56,0.08);
+  font-family: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+  color-scheme: light;
 }
 
-@font-face {
-    font-family: "JetBrains Mono";
-    src: url("fonts/JetBrainsMono-Regular.woff2");
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:#0f172a}
+
+.hs-header{border-bottom:1px solid #eef2f7;background:#fff;position:sticky;top:0;z-index:30}
+.hs-top{max-width:1200px;margin:0 auto;display:flex;align-items:center;gap:16px;padding:12px}
+.hs-brand{font-weight:700;font-size:22px;color:var(--primary)}
+.hs-search{flex:1}
+.hs-search input{width:100%;padding:10px 12px;border:1px solid #e6e9ef;border-radius:6px}
+.hs-actions button{margin-left:8px;padding:8px 12px;border-radius:6px;border:1px solid #e6e9ef;background:#fff;cursor:pointer}
+.hs-nav{max-width:1200px;margin:0 auto;padding:8px 12px;display:flex;gap:12px}
+.hs-nav a{color:var(--muted);text-decoration:none;font-size:14px}
+
+.hs-main{max-width:1200px;margin:18px auto;display:grid;grid-template-columns:220px 1fr;gap:18px;padding:0 12px}
+.hs-filters{border:1px solid #eef2f7;padding:12px;border-radius:8px;background:#fff;height:fit-content}
+.hs-products{display:flex;flex-direction:column}
+.hs-tools{display:flex;justify-content:space-between;align-items:center;padding:8px 0}
+.products-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:16px}
+.product-card{background:var(--card);border-radius:8px;border:1px solid #eef2f7;padding:12px;box-shadow:var(--shadow);display:flex;flex-direction:column;align-items:start}
+.product-card img{width:100%;height:160px;object-fit:cover;border-radius:6px;margin-bottom:8px}
+.product-title{font-size:14px;font-weight:600;color:#0f172a;margin-bottom:6px}
+.product-price{font-size:16px;font-weight:700;color:var(--primary);margin-bottom:8px}
+.product-meta{font-size:12px;color:var(--muted);margin-bottom:8px}
+.product-actions{margin-top:auto;width:100%;display:flex;gap:8px}
+.btn{padding:8px 10px;border-radius:6px;border:1px solid #e6e9ef;background:#fff;cursor:pointer}
+.btn-primary{background:var(--primary);color:#fff;border-color:transparent}
+
+.cart-drawer{position:fixed;right:0;top:0;height:100vh;width:360px;background:#fff;border-left:1px solid #eef2f7;padding:16px;box-shadow:-8px 0 24px rgba(2,6,23,0.06);z-index:60;display:flex;flex-direction:column}
+.cart-drawer.hidden{transform:translateX(100%);transition:transform .25s ease-in-out}
+.cart-drawer:not(.hidden){transform:translateX(0)}
+.cart-item{display:flex;gap:10px;padding:8px 0;border-bottom:1px dashed #f1f5f9}
+.cart-item img{width:64px;height:64px;object-fit:cover;border-radius:6px}
+.cart-footer{margin-top:auto;display:flex;justify-content:space-between;align-items:center}
+
+@media (max-width:900px){
+  .hs-main{grid-template-columns:1fr;padding:0 12px}
+  .hs-filters{display:none}
+  .cart-drawer{width:100%;}
 }
 
-:root {
-    font-family: "JetBrains Sans", Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
-    font-weight: 300;
-    color: rgba(255, 255, 255, 0.87);
-    background-color: #000000;
-    text-align: center;
-}
-
-body {
-    margin: 0;
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    min-width: 320px;
-    min-height: 100vh;
-    align-items: center;
-
-    background-image: url("background.svg");
-    background-repeat: no-repeat;
-    background-size: contain;
-}
-
-h1 {
-    font-size: 29px;
-    line-height: 39px;
-    font-weight: 300;
-}
-
-.title {
-    margin-bottom: 40px;
-}
-
-#app {
-    max-width: 1280px;
-}
-
-.logo {
-    margin-top: 45px;
-    margin-left: 20%;
-    align-self: flex-start;
-}
-
-img {
-    max-width: 100%;
-    height: auto;
-}
-
-.counter {
-    font-family: "JetBrains Mono", Inter, system-ui, sans-serif;
-    font-weight: 400;
-    display: flex;
-    flex-direction: row;
-    justify-content: center;
-    padding: 60px;
-    color: rgba(255, 255, 255, 1);
-}
-
-.counter-interaction {
-    display: flex;
-    flex-direction: row;
-    flex-wrap: wrap;
-    gap: 20px 0;
-    width: 470px;
-    justify-content: space-between;
-}
-
-.counter-interaction button {
-    width: 48%;
-    height: 47%;
-    align-content: space-between;
-    border: 1px solid rgba(255, 255, 255, 0.3);
-    border-radius: 120px;
-    font-size: 68px;
-    text-align: center;
-}
-
-.counter-interaction button:nth-child(2n+1) {
-    margin-right: 14px;
-}
-
-.counter-interaction button:disabled {
-    color: rgba(255, 255, 255, 0.5);
-    background-image: none;
-    border-color: inherit;
-}
-
-.counter-info {
-    width: 360px;
-    height: 345px;
-    margin-right: 27px;
-    border: 1px solid rgba(255, 255, 255, 0.3);
-    background-color: rgba(25, 25, 28, 0.5);
-    border-radius: 29px;
-}
-
-.counter-text {
-    text-transform: uppercase;
-    font-weight: 500;
-    font-size: 24px;
-    margin-top: 60px;
-    margin-bottom: 28px;
-
-}
-
-.counter-value {
-    font-weight: 200;
-    font-size: 170px;
-    margin: 0;
-    padding: 0;
-    line-height: 1;
-}
-
-button {
-    font-family: "JetBrains Mono", Inter, system-ui, sans-serif;
-    background-color: rgba(25, 25, 28, 0.5);
-    cursor: pointer;
-    color: rgba(255, 255, 255, 1);
-}
-
-button:hover {
-    background-image: radial-gradient(
-            farthest-corner at 77% 83%,
-            rgba(1, 197, 245, 0.5) 2%,
-            rgba(1, 126, 254, 0.5) 28%,
-            rgba(25, 25, 28, 0) 70%
-    );
-    border: 1px solid rgba(76, 166, 255, 0.2);
-    background-clip: padding-box;
-}
-
-.technologies {
-    margin-bottom: 36px;
-    align-self: center;
-}
-
-.technologies img {
-    max-width: fit-content;
-}
-
-
-@media (max-width: 875px) {
-
-    .logo {
-        margin-top: 10px;
-    }
-
-    .title {
-        margin-bottom: 30px;
-    }
-
-    .counter {
-        flex-direction: column;
-        padding: 0;
-        margin-bottom: 0;
-    }
-
-    .counter-info {
-        width: 100%;
-        height: 300px;
-        margin-right: 0;
-        margin-bottom: 15px;
-    }
-
-    .counter-interaction {
-        display: flex;
-        flex-direction: row;
-        height: auto;
-        width: auto;
-    }
-
-    .counter-interaction button {
-        width: 47%;
-        height: 100px;
-        margin-right: 0;
-        margin-bottom: 15px;
-    }
-}
